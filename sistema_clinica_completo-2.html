@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Financeiro - Clinica Dr. Leonardo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #f4d03f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: #f8f9fa;
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-bottom: 3px solid #f4d03f;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .card h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #f4d03f;
+            padding-bottom: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .summary-card h4 {
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .summary-card .value {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .transactions-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+        }
+
+        .transaction-item {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .transaction-value.receita {
+            color: #28a745;
+        }
+
+        .transaction-value.despesa {
+            color: #dc3545;
+        }
+
+        .transaction-date {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .table th, .table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 13px;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .valor-detalhado {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+
+        .alert {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .status-pendente {
+            background: #ffc107;
+            color: #212529;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .status-pago {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sistema Financeiro</h1>
+            <p>Clinica Oftalmologica Dr. Leonardo</p>
+            <div style="margin-top: 15px;">
+                <button onclick="adicionarDadosExemplo()" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 8px 15px; border-radius: 5px; margin: 5px; cursor: pointer;">
+                    Adicionar Dados de Exemplo
+                </button>
+                <button onclick="limparTodosDados()" style="background: rgba(220,53,69,0.8); border: 1px solid white; color: white; padding: 8px 15px; border-radius: 5px; margin: 5px; cursor: pointer;">
+                    Limpar Todos os Dados
+                </button>
+            </div>
+
+            <div class="card">
+                <h3>Controle de Parcelas</h3>
+                <div style="overflow-x: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Parcela</th>
+                                <th>Valor</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaParcelas">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #666;">Nenhuma parcela cadastrada</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insumos -->
+        <div id="insumos" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h3>Adicionar Novo Lote de Insumo</h3>
+                    <form id="formInsumo">
+                        <div class="form-group">
+                            <label>Nome do Insumo</label>
+                            <input type="text" name="nomeInsumo" placeholder="Ex: Lidocaina 2%, Fio de sutura..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Numero do Lote</label>
+                            <input type="text" name="numeroLote" placeholder="Ex: L2024001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Data de Vencimento</label>
+                            <input type="date" name="dataVencimento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Unitario (R$)</label>
+                            <input type="number" step="0.01" name="valorInsumo" placeholder="0,00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <select name="categoriaInsumo">
+                                <option value="medicamento">Medicamento</option>
+                                <option value="material">Material Cirurgico</option>
+                                <option value="equipamento">Equipamento Descartavel</option>
+                                <option value="gas">Gases</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantidade Recebida</label>
+                            <input type="number" name="quantidadeRecebida" placeholder="0" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Estoque Minimo (Alerta)</label>
+                            <input type="number" name="estoqueMinimo" placeholder="5" min="0" value="5">
+                        </div>
+                        <button type="submit" class="btn">Adicionar Lote ao Estoque</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Alertas de Estoque</h3>
+                    <div id="alertasEstoque" style="background: #fff3cd; padding: 15px; border-radius: 10px;">
+                        <div>Nenhum alerta no momento</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Controle de Estoque por Lote</h3>
+                <div style="overflow-x: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Insumo</th>
+                                <th>Lote</th>
+                                <th>Vencimento</th>
+                                <th>Estoque Atual</th>
+                                <th>Estoque Min.</th>
+                                <th>Valor Unit.</th>
+                                <th>Status</th>
+                                <th>Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaInsumos">
+                            <tr>
+                                <td colspan="8" style="text-align: center; color: #666;">Nenhum lote cadastrado</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Historico de Uso</h3>
+                <div style="overflow-x: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Paciente</th>
+                                <th>Cirurgia</th>
+                                <th>Insumo</th>
+                                <th>Lote</th>
+                                <th>Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaRastreabilidade">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #666;">Nenhum uso registrado</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financeiro -->
+        <div id="financeiro" class="tab-content">
+            <div class="card">
+                <h3>Controle de Saldo</h3>
+                <div class="form-group">
+                    <label>Saldo Atual da Conta (R$)</label>
+                    <input type="number" step="0.01" id="inputSaldo" placeholder="0,00">
+                </div>
+                <button type="button" class="btn" onclick="atualizarSaldo()">Atualizar Saldo</button>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                    <h4>Situacao Financeira:</h4>
+                    <div class="valor-detalhado">
+                        <span>Saldo Atual:</span>
+                        <span id="displaySaldo">R$ 0,00</span>
+                    </div>
+                    <div class="valor-detalhado">
+                        <span>Gastos Fixos Mensais:</span>
+                        <span>R$ 43.183,01</span>
+                    </div>
+                    <hr>
+                    <div class="valor-detalhado">
+                        <span><strong>Saldo Projetado:</strong></span>
+                        <span id="saldoProjetado"><strong>R$ -43.183,01</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relatorios -->
+        <div id="relatorios" class="tab-content">
+            <div class="card">
+                <h3>Relatorios Financeiros</h3>
+                
+                <div class="form-group">
+                    <label>Tipo de Relatorio:</label>
+                    <select id="tipoRelatorio">
+                        <option value="mensal">Mensal</option>
+                        <option value="semanal">Semanal</option>
+                        <option value="anual">Anual</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Periodo:</label>
+                    <input type="month" id="periodoRelatorio">
+                </div>
+                
+                <button class="btn" onclick="gerarRelatorio()">Gerar Relatorio</button>
+                
+                <div id="resultadoRelatorio" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados do sistema
+        let dados = {
+            receitas: [],
+            despesas: [],
+            cirurgias: [],
+            gastosFixos: [],
+            parcelas: [],
+            insumos: [],
+            saldoAtual: 0
+        };
+
+        let insumosUtilizadosCirurgia = [];
+
+        // Funcao para trocar abas
+        function abrirAba(nomeAba) {
+            // Esconder todas as abas
+            var todasAbas = document.querySelectorAll('.tab-content');
+            for (var i = 0; i < todasAbas.length; i++) {
+                todasAbas[i].classList.remove('active');
+            }
+            
+            // Remover active de todos os botoes
+            var todosBotoes = document.querySelectorAll('.tab');
+            for (var i = 0; i < todosBotoes.length; i++) {
+                todosBotoes[i].classList.remove('active');
+            }
+            
+            // Mostrar a aba selecionada
+            document.getElementById(nomeAba).classList.add('active');
+            
+            // Ativar o botao clicado
+            event.target.classList.add('active');
+            
+            // Carregar conteudo da aba
+            setTimeout(function() {
+                if (nomeAba === 'dashboard') {
+                    atualizarDashboard();
+                } else if (nomeAba === 'receitas') {
+                    atualizarListaReceitas();
+                } else if (nomeAba === 'despesas') {
+                    atualizarListaDespesas();
+                } else if (nomeAba === 'cirurgias') {
+                    carregarInsumosDisponiveis();
+                    atualizarListaCirurgias();
+                } else if (nomeAba === 'gastosFixos') {
+                    atualizarListaGastosFixos();
+                } else if (nomeAba === 'parcelas') {
+                    atualizarTabelaParcelas();
+                    atualizarResumoParcelas();
+                } else if (nomeAba === 'insumos') {
+                    atualizarTabelaInsumos();
+                    atualizarAlertas();
+                } else if (nomeAba === 'financeiro') {
+                    atualizarFinanceiro();
+                }
+            }, 100);
+        }
+
+        // Funcao para formatar moeda
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
+
+        // Funcao para formatar data
+        function formatarData(data) {
+            return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+        }
+
+        // Atualizar dashboard
+        function atualizarDashboard() {
+            var mesAtual = new Date().toISOString().slice(0, 7);
+            
+            var totalReceitas = 0;
+            var totalDespesas = 0;
+            var totalCirurgias = 0;
+            
+            dados.receitas.forEach(function(receita) {
+                if (receita.data.startsWith(mesAtual)) {
+                    totalReceitas += parseFloat(receita.valor);
+                }
+            });
+            
+            dados.despesas.forEach(function(despesa) {
+                if (despesa.data.startsWith(mesAtual)) {
+                    totalDespesas += parseFloat(despesa.valor);
+                }
+            });
+            
+            dados.cirurgias.forEach(function(cirurgia) {
+                if (cirurgia.data.startsWith(mesAtual)) {
+                    totalCirurgias++;
+                }
+            });
+            
+            var resultado = totalReceitas - totalDespesas;
+            
+            document.getElementById('saldoAtual').textContent = formatarMoeda(dados.saldoAtual);
+            document.getElementById('totalReceitas').textContent = formatarMoeda(totalReceitas);
+            document.getElementById('totalDespesas').textContent = formatarMoeda(totalDespesas);
+            document.getElementById('resultado').textContent = formatarMoeda(resultado);
+            document.getElementById('totalCirurgias').textContent = totalCirurgias;
+            
+            atualizarUltimasTransacoes();
+        }
+
+        // Funcoes basicas de atualizacao
+        function atualizarUltimasTransacoes() {
+            var container = document.getElementById('ultimasTransacoes');
+            if (dados.receitas.length === 0 && dados.despesas.length === 0) {
+                container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Nenhuma transacao registrada ainda</div><div class="transaction-date">Adicione receitas e despesas para comecar</div></div></div>';
+            } else {
+                container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Sistema funcionando</div><div class="transaction-date">Ultimas transacoes aparecerão aqui</div></div></div>';
+            }
+        }
+
+        function atualizarListaReceitas() {
+            var container = document.getElementById('listaReceitas');
+            container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Lista de receitas sera exibida aqui</div></div></div>';
+        }
+
+        function atualizarListaDespesas() {
+            var container = document.getElementById('listaDespesas');
+            container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Lista de despesas sera exibida aqui</div></div></div>';
+        }
+
+        function atualizarListaCirurgias() {
+            var container = document.getElementById('listaCirurgias');
+            container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Lista de cirurgias sera exibida aqui</div></div></div>';
+        }
+
+        function atualizarListaGastosFixos() {
+            var container = document.getElementById('listaGastosFixos');
+            container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Lista de gastos fixos sera exibida aqui</div></div></div>';
+        }
+
+        function atualizarTabelaParcelas() {
+            var container = document.getElementById('tabelaParcelas');
+            container.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">Sistema funcionando - parcelas aparecerão aqui</td></tr>';
+        }
+
+        function atualizarResumoParcelas() {
+            document.getElementById('parcelasEsteMes').textContent = 'R$ 0,00';
+            document.getElementById('parcelasProximoMes').textContent = 'R$ 0,00';
+            document.getElementById('totalRestante').textContent = 'R$ 0,00';
+        }
+
+        function atualizarTabelaInsumos() {
+            var container = document.getElementById('tabelaInsumos');
+            container.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666;">Sistema funcionando - insumos aparecerão aqui</td></tr>';
+        }
+
+        function atualizarAlertas() {
+            document.getElementById('alertasEstoque').innerHTML = '<div>Sistema funcionando - alertas aparecerão aqui</div>';
+        }
+
+        function atualizarFinanceiro() {
+            document.getElementById('inputSaldo').value = dados.saldoAtual;
+            document.getElementById('displaySaldo').textContent = formatarMoeda(dados.saldoAtual);
+            var saldoProjetado = dados.saldoAtual - 43183.01;
+            document.getElementById('saldoProjetado').innerHTML = '<strong>' + formatarMoeda(saldoProjetado) + '</strong>';
+        }
+
+        function carregarInsumosDisponiveis() {
+            var container = document.getElementById('listaInsumosDisponiveis');
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Insumos disponiveis aparecerão aqui</div>';
+        }
+
+        function calcularCustosCirurgia() {
+            document.getElementById('valorBruto').textContent = 'R$ 0,00';
+            document.getElementById('totalInsumos').textContent = 'R$ 0,00';
+            document.getElementById('impostoCalculado').textContent = 'R$ 0,00';
+            document.getElementById('taxaCartao').textContent = 'R$ 0,00';
+            document.getElementById('comissaoCalculada').textContent = 'R$ 0,00';
+            document.getElementById('pagamentoEnfermeira').textContent = 'R$ 0,00';
+            document.getElementById('valorLiquido').textContent = 'R$ 0,00';
+            document.getElementById('margemLucro').textContent = '0%';
+        }
+
+        function calcularParcela() {
+            document.getElementById('valorParcelaCalculado').textContent = 'R$ 0,00';
+        }
+
+        function adicionarInsumoPersonalizado() {
+            alert('Funcionalidade em desenvolvimento');
+        }
+
+        function atualizarSaldo() {
+            var novoSaldo = parseFloat(document.getElementById('inputSaldo').value) || 0;
+            dados.saldoAtual = novoSaldo;
+            atualizarFinanceiro();
+            atualizarDashboard();
+            alert('Saldo atualizado com sucesso!');
+        }
+
+        function gerarRelatorio() {
+            document.getElementById('resultadoRelatorio').innerHTML = '<div class="alert">Relatorio sera gerado aqui</div>';
+        }
+
+        function adicionarDadosExemplo() {
+            if (confirm('Deseja adicionar alguns dados de exemplo para testar o sistema?')) {
+                dados.receitas.push({
+                    id: 1001,
+                    descricao: 'Cirurgia de Retina - Joao Silva',
+                    valor: 8500,
+                    data: '2024-05-15'
+                });
+                
+                dados.despesas.push({
+                    id: 2001,
+                    descricao: 'Materiais cirurgicos',
+                    valor: 1200,
+                    data: '2024-05-16'
+                });
+
+                dados.saldoAtual = 15000;
+                
+                atualizarDashboard();
+                alert('Dados de exemplo adicionados com sucesso!');
+            }
+        }
+
+        function limparTodosDados() {
+            if (confirm('Tem certeza que deseja limpar todos os dados?')) {
+                dados = {
+                    receitas: [],
+                    despesas: [],
+                    cirurgias: [],
+                    gastosFixos: [],
+                    parcelas: [],
+                    insumos: [],
+                    saldoAtual: 0
+                };
+                atualizarDashboard();
+                alert('Todos os dados foram limpos!');
+            }
+        }
+
+        // Inicializar sistema quando carrega a pagina
+        document.addEventListener('DOMContentLoaded', function() {
+            var hoje = new Date().toISOString().slice(0, 10);
+            var mesAtual = new Date().toISOString().slice(0, 7);
+            
+            // Definir datas padrao
+            var camposData = document.querySelectorAll('input[type="date"]');
+            for (var i = 0; i < camposData.length; i++) {
+                if (camposData[i].value === '') {
+                    camposData[i].value = hoje;
+                }
+            }
+            
+            document.getElementById('periodoRelatorio').value = mesAtual;
+            
+            // Carregar dashboard inicial
+            atualizarDashboard();
+        });
+    </script>
+</body>
+</html>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="abrirAba('dashboard')">Dashboard</div>
+            <div class="tab" onclick="abrirAba('receitas')">Receitas</div>
+            <div class="tab" onclick="abrirAba('despesas')">Despesas</div>
+            <div class="tab" onclick="abrirAba('cirurgias')">Cirurgias</div>
+            <div class="tab" onclick="abrirAba('funcionarios')">Funcionarios</div>
+            <div class="tab" onclick="abrirAba('gastosFixos')">Gastos Fixos</div>
+            <div class="tab" onclick="abrirAba('parcelas')">Parcelas</div>
+            <div class="tab" onclick="abrirAba('insumos')">Insumos</div>
+            <div class="tab" onclick="abrirAba('financeiro')">Financeiro</div>
+            <div class="tab" onclick="abrirAba('relatorios')">Relatorios</div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="tab-content active">
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h4>Saldo Atual</h4>
+                    <div class="value" id="saldoAtual">R$ 0,00</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Receita do Mes</h4>
+                    <div class="value" id="totalReceitas">R$ 0,00</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Despesas do Mes</h4>
+                    <div class="value" id="totalDespesas">R$ 0,00</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Gastos Fixos</h4>
+                    <div class="value" id="totalGastosFixos">R$ 43.183,01</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Resultado do Mes</h4>
+                    <div class="value" id="resultado">R$ 0,00</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Cirurgias do Mes</h4>
+                    <div class="value" id="totalCirurgias">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Ultimas Transacoes</h3>
+                <div class="transactions-list" id="ultimasTransacoes">
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div>Sistema iniciado com sucesso!</div>
+                            <div class="transaction-date">Adicione receitas e despesas para comecar</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Receitas -->
+        <div id="receitas" class="tab-content">
+            <div class="card">
+                <h3>Registrar Receita</h3>
+                <form id="formReceita">
+                    <div class="form-group">
+                        <label>Fonte da Receita</label>
+                        <select name="fonte" required>
+                            <option value="">Selecione...</option>
+                            <option value="consultorio-particular">Consultorio Particular</option>
+                            <option value="mutiroes">Mutiroes</option>
+                            <option value="sus">Servico SUS</option>
+                            <option value="cirurgias">Cirurgias</option>
+                            <option value="consultas">Consultas</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descricao</label>
+                        <input type="text" name="descricao" placeholder="Ex: Consultas dia 15/05" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" step="0.01" name="valor" placeholder="0,00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" name="data" required>
+                    </div>
+                    <button type="submit" class="btn">Adicionar Receita</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Receitas Registradas</h3>
+                <div class="transactions-list" id="listaReceitas">
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div>Nenhuma receita registrada ainda</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Despesas -->
+        <div id="despesas" class="tab-content">
+            <div class="card">
+                <h3>Registrar Despesa</h3>
+                <form id="formDespesa">
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select name="categoria" required>
+                            <option value="">Selecione...</option>
+                            <option value="salarios">Salarios</option>
+                            <option value="insumos">Insumos Medicos</option>
+                            <option value="equipamentos">Equipamentos</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="gasolina">Gasolina/Combustivel</option>
+                            <option value="impostos">Impostos</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descricao</label>
+                        <input type="text" name="descricao" placeholder="Descreva a despesa" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" step="0.01" name="valor" placeholder="0,00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" name="data" required>
+                    </div>
+                    <button type="submit" class="btn">Adicionar Despesa</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Despesas Registradas</h3>
+                <div class="transactions-list" id="listaDespesas">
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div>Nenhuma despesa registrada ainda</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cirurgias -->
+        <div id="cirurgias" class="tab-content">
+            <div class="card">
+                <h3>Registrar Cirurgia Completa</h3>
+                <form id="formCirurgia">
+                    <div class="grid">
+                        <div>
+                            <div class="form-group">
+                                <label>Tipo de Cirurgia</label>
+                                <select name="tipo" required onchange="calcularCustosCirurgia()">
+                                    <option value="">Selecione...</option>
+                                    <option value="retina">Cirurgia de Retina</option>
+                                    <option value="catarata">Cirurgia de Catarata</option>
+                                    <option value="anti-vegf">Injecao Anti-VEGF</option>
+                                    <option value="glaucoma">Cirurgia de Glaucoma</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Valor da Cirurgia (R$)</label>
+                                <input type="number" step="0.01" name="valor" placeholder="0,00" required onchange="calcularCustosCirurgia()">
+                            </div>
+                            <div class="form-group">
+                                <label>Data da Cirurgia</label>
+                                <input type="date" name="data" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Paciente</label>
+                                <input type="text" name="paciente" placeholder="Nome do paciente" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Forma de Pagamento</label>
+                                <select name="formaPagamento" onchange="calcularCustosCirurgia()">
+                                    <option value="dinheiro">Dinheiro/PIX</option>
+                                    <option value="cartao">Cartao (taxa 3,5%)</option>
+                                    <option value="convenio">Convenio</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4>Insumos Utilizados:</h4>
+                            <div id="insumosUtilizados" style="max-height: 300px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 5px; padding: 10px;">
+                                <div id="listaInsumosDisponiveis"></div>
+                                <button type="button" class="btn" style="width: 100%; margin-top: 10px;" onclick="adicionarInsumoPersonalizado()">Adicionar Insumo Personalizado</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                        <h4>Calculo Detalhado da Cirurgia:</h4>
+                        <div class="valor-detalhado">
+                            <span>Valor Bruto:</span>
+                            <span style="color: #28a745; font-weight: bold;" id="valorBruto">R$ 0,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>(-) Total Insumos:</span>
+                            <span id="totalInsumos">R$ 0,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>(-) Imposto (18%):</span>
+                            <span id="impostoCalculado">R$ 0,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>(-) Taxa Cartao:</span>
+                            <span id="taxaCartao">R$ 0,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>(-) Comissao Nicole (3%):</span>
+                            <span id="comissaoCalculada">R$ 0,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>(-) Pagamento Julielli:</span>
+                            <span id="pagamentoEnfermeira">R$ 0,00</span>
+                        </div>
+                        <hr>
+                        <div class="valor-detalhado">
+                            <span><strong>Valor Liquido Final:</strong></span>
+                            <span style="color: #1e3c72; font-weight: bold;" id="valorLiquido">R$ 0,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span><strong>Margem de Lucro:</strong></span>
+                            <span style="color: #17a2b8; font-weight: bold;" id="margemLucro">0%</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">Registrar Cirurgia Completa</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Cirurgias Realizadas</h3>
+                <div class="transactions-list" id="listaCirurgias">
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div>Nenhuma cirurgia registrada ainda</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funcionarios -->
+        <div id="funcionarios" class="tab-content">
+            <div class="card">
+                <h3>Funcionarios da Clinica</h3>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h4>Funcionarias CLT:</h4>
+                    <ul style="margin: 15px 0; padding-left: 25px;">
+                        <li><strong>Nicole:</strong> R$ 2.500,00 + 3% do valor bruto de cada cirurgia</li>
+                        <li><strong>Julielli (Enfermeira):</strong> R$ 4.750,00 + valores por cirurgia:
+                            <ul style="margin-left: 20px;">
+                                <li>Retina: R$ 200,00</li>
+                                <li>Anti-VEGF: R$ 100,00</li>
+                                <li>Catarata: R$ 150,00</li>
+                            </ul>
+                        </li>
+                        <li><strong>Fernanda:</strong> R$ 2.100,00 (salario fixo)</li>
+                    </ul>
+                    
+                    <h4>Funcionarios Diarios:</h4>
+                    <ul style="margin: 15px 0; padding-left: 25px;">
+                        <li><strong>Ennos:</strong> R$ 200,00 por dia trabalhado</li>
+                        <li><strong>Yasmin:</strong> R$ 250,00 por dia trabalhado</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Controle de Dias Trabalhados</h3>
+                <form id="formDiasTrabalhados">
+                    <div class="form-group">
+                        <label>Funcionario</label>
+                        <select name="funcionario" required>
+                            <option value="">Selecione...</option>
+                            <option value="ennos">Ennos - R$ 200,00/dia</option>
+                            <option value="yasmin">Yasmin - R$ 250,00/dia</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Data Trabalhada</label>
+                        <input type="date" name="data" required>
+                    </div>
+                    <button type="submit" class="btn">Registrar Dia</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Gastos Fixos -->
+        <div id="gastosFixos" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h3>Adicionar Gasto Fixo</h3>
+                    <form id="formGastoFixo">
+                        <div class="form-group">
+                            <label>Descricao</label>
+                            <input type="text" name="descricao" placeholder="Ex: Salario Nicole, IPTU, etc." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Mensal (R$)</label>
+                            <input type="number" step="0.01" name="valor" placeholder="0,00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <select name="categoria">
+                                <option value="salario">Salario</option>
+                                <option value="imposto">Imposto</option>
+                                <option value="conta">Conta Fixa</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn">Adicionar</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Gastos Fixos Padrao</h3>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 10px;">
+                        <div class="valor-detalhado">
+                            <span>Salario Nicole:</span>
+                            <span>R$ 2.500,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>Salario Julielli:</span>
+                            <span>R$ 4.750,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>Salario Fernanda:</span>
+                            <span>R$ 2.100,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>FGTS:</span>
+                            <span>R$ 272,50</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>INSS:</span>
+                            <span>R$ 260,51</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>Simples Nacional:</span>
+                            <span>R$ 2.800,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>Divida Ativa:</span>
+                            <span>R$ 500,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>Imposto Mensal:</span>
+                            <span>R$ 30.000,00</span>
+                        </div>
+                        <hr style="margin: 10px 0;">
+                        <div class="valor-detalhado">
+                            <span><strong>Total:</strong></span>
+                            <span><strong>R$ 43.183,01</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Gastos Fixos Adicionais</h3>
+                <div id="listaGastosFixos">
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div>Nenhum gasto fixo adicional cadastrado</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parcelas -->
+        <div id="parcelas" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h3>Adicionar Novo Parcelamento</h3>
+                    <form id="formParcela">
+                        <div class="form-group">
+                            <label>Tipo do Item</label>
+                            <select name="tipoItem" required>
+                                <option value="">Selecione...</option>
+                                <option value="equipamento">Equipamento Medico</option>
+                                <option value="veiculo">Veiculo</option>
+                                <option value="mobiliario">Mobiliario</option>
+                                <option value="reforma">Reforma/Obra</option>
+                                <option value="financiamento">Financiamento</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Descricao</label>
+                            <input type="text" name="descricaoItem" placeholder="Ex: Laser YAG, Microscopio..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Total (R$)</label>
+                            <input type="number" step="0.01" name="valorTotal" placeholder="0,00" required onchange="calcularParcela()" oninput="calcularParcela()">
+                        </div>
+                        <div class="form-group">
+                            <label>Numero de Parcelas</label>
+                            <input type="number" min="1" max="120" name="numeroParcelas" placeholder="12" required onchange="calcularParcela()" oninput="calcularParcela()">
+                        </div>
+                        <div class="form-group">
+                            <label>Data da Primeira Parcela</label>
+                            <input type="date" name="dataPrimeira" required>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>Valor da Parcela: <span id="valorParcelaCalculado">R$ 0,00</span></strong>
+                        </div>
+                        <button type="submit" class="btn">Adicionar Parcelamento</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Resumo de Parcelas</h3>
+                    <div style="padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                        <div class="valor-detalhado">
+                            <span>Parcelas Este Mes:</span>
+                            <span id="parcelasEsteMes">R$ 0,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>Proximo Mes:</span>
+                            <span id="parcelasProximoMes">R$ 0,00</span>
+                        </div>
+                        <div class="valor-detalhado">
+                            <span>Total Restante:</span>
+                            <span id="totalRestante">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+            

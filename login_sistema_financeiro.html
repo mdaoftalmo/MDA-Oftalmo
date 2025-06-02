@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema Financeiro | Clínica Dr. Leonardo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #f4d03f 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 500px;
+        }
+
+        .login-left {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="90" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="1" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+
+        .logo {
+            font-size: 3em;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-left h1 {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-left p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .features {
+            margin-top: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 12px;
+        }
+
+        .login-right {
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-form {
+            width: 100%;
+        }
+
+        .login-form h2 {
+            color: #1e3c72;
+            font-size: 2em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .login-form .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2a5298;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #999;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            font-size: 18px;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+
+        .remember-me input {
+            margin-right: 8px;
+            width: auto;
+        }
+
+        .forgot-password {
+            color: #2a5298;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            border-left: 4px solid #dc3545;
+            display: none;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            border-left: 4px solid #28a745;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2a5298;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .demo-credentials {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .demo-credentials h4 {
+            color: #0c5460;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .demo-credentials p {
+            color: #0c5460;
+            font-size: 0.85em;
+            margin: 5px 0;
+        }
+
+        .quick-login-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .quick-login-btn:hover {
+            background: #138496;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+
+            .login-left {
+                padding: 40px 30px;
+                text-align: center;
+            }
+
+            .login-left h1 {
+                font-size: 1.8em;
+            }
+
+            .login-right {
+                padding: 40px 30px;
+            }
+
+            .logo {
+                font-size: 2em;
+            }
+
+            .features {
+                display: none;
+            }
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Lado Esquerdo - Informações -->
+        <div class="login-left">
+            <div class="logo">👁️</div>
+            <h1>Sistema Financeiro</h1>
+            <p>Gestão completa e inteligente para clínicas oftalmológicas</p>
+            
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <span>Dashboard em tempo real</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">💰</div>
+                    <span>Controle de receitas e despesas</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🏥</div>
+                    <span>Gestão de cirurgias</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📋</div>
+                    <span>Relatórios detalhados</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔒</div>
+                    <span>Segurança total</span>
+                </div>
+            </div>
+
+            <div class="footer">
+                © 2024 Clínica Dr. Leonardo - Todos os direitos reservados
+            </div>
+        </div>
+
+        <!-- Lado Direito - Formulário -->
+        <div class="login-right">
+            <form class="login-form" id="loginForm">
+                <h2>Bem-vindo!</h2>
+                <p class="subtitle">Faça login para acessar o sistema</p>
+
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="Digite seu usuário"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Digite sua senha"
+                        required
+                        autocomplete="current-password"
+                    >
+                    <span class="password-toggle" onclick="togglePassword()">👁️</span>
+                </div>
+
+                <div class="remember-forgot">
+                    <label class="remember-me">
+                        <input type="checkbox" id="rememberMe" name="rememberMe">
+                        Lembrar de mim
+                    </label>
+                    <a href="#" class="forgot-password" onclick="mostrarRecuperacao()">Esqueceu a senha?</a>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    Entrar no Sistema
+                </button>
+
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <span>Verificando credenciais...</span>
+                </div>
+
+                <!-- Credenciais de Demonstração -->
+                <div class="demo-credentials">
+                    <h4>🚀 Acesso de Demonstração:</h4>
+                    <p><strong>Usuário:</strong> admin</p>
+                    <p><strong>Senha:</strong> leonardo2024</p>
+                    <button type="button" class="quick-login-btn" onclick="loginDemo()">
+                        Entrar com credenciais demo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Credenciais válidas
+        const credenciaisValidas = {
+            'admin': 'leonardo2024',
+            'leonardo': 'clinica123',
+            'financeiro': 'gestao2024',
+            'secretaria': 'atendimento123'
+        };
+
+        // Elementos do DOM
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const loading = document.getElementById('loading');
+        const loginBtn = document.getElementById('loginBtn');
+
+        // Função para alternar visibilidade da senha
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const passwordToggle = document.querySelector('.password-toggle');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordToggle.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                passwordToggle.textContent = '👁️';
+            }
+        }
+
+        // Função para login demo
+        function loginDemo() {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'leonardo2024';
+            realizarLogin();
+        }
+
+        // Função para mostrar recuperação de senha
+        function mostrarRecuperacao() {
+            alert('Para recuperar sua senha, entre em contato com o administrador do sistema.\n\nTelefone: (42) 99999-9999\nEmail: admin@drleonardo.com.br');
+        }
+
+        // Função principal de login
+        function realizarLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Validação básica
+            if (!username || !password) {
+                mostrarErro('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            // Mostrar loading
+            mostrarLoading(true);
+
+            // Simular verificação (em produção seria uma requisição para servidor)
+            setTimeout(() => {
+                if (credenciaisValidas[username] === password) {
+                    // Login bem-sucedido
+                    mostrarSucesso('Login realizado com sucesso! Redirecionando...');
+                    
+                    // Salvar informações de login se "lembrar de mim" estiver marcado
+                    if (document.getElementById('rememberMe').checked) {
+                        localStorage.setItem('loginSalvo', username);
+                    }
+
+                    // Redirecionar para o sistema financeiro após 2 segundos
+                    setTimeout(() => {
+                        // Aqui você redirecionaria para o sistema financeiro
+                        // window.location.href = 'sistema-financeiro.html';
+                        
+                        // Para demonstração, vamos simular a abertura do sistema
+                        alert('🎉 Login bem-sucedido!\n\nVocê seria redirecionado para o sistema financeiro.\n\nPara integrar com seu site, substitua este alert por:\nwindow.location.href = "sistema-financeiro.html"');
+                        
+                        // Resetar formulário para nova demonstração
+                        loginForm.reset();
+                        mostrarLoading(false);
+                        
+                    }, 2000);
+
+                } else {
+                    // Login com erro
+                    mostrarErro('Usuário ou senha incorretos! Verifique suas credenciais.');
+                    mostrarLoading(false);
+                }
+            }, 1500); // Simular delay de rede
+        }
+
+        // Event listener para o formulário
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            realizarLogin();
+        });
+
+        // Funções auxiliares
+        function mostrarErro(mensagem) {
+            errorMessage.textContent = mensagem;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            
+            // Ocultar após 5 segundos
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function mostrarSucesso(mensagem) {
+            successMessage.textContent = mensagem;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        function mostrarLoading(mostrar) {
+            if (mostrar) {
+                loading.style.display = 'block';
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Verificando...';
+            } else {
+                loading.style.display = 'none';
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Entrar no Sistema';
+            }
+        }
+
+        // Carregar informações salvas
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginSalvo = localStorage.getItem('loginSalvo');
+            if (loginSalvo) {
+                document.getElementById('username').value = loginSalvo;
+                document.getElementById('rememberMe').checked = true;
+                document.getElementById('password').focus();
+            }
+
+            // Easter egg - animação extra
+            const logo = document.querySelector('.logo');
+            logo.addEventListener('click', function() {
+                logo.style.animation = 'spin 0.5s ease-in-out';
+                setTimeout(() => {
+                    logo.style.animation = '';
+                }, 500);
+            });
+        });
+
+        // Atalho de teclado Enter para login
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !loginBtn.disabled) {
+                realizarLogin();
+            }
+        });
+    </script>
+</body>
+</html>
