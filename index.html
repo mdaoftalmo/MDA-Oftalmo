@@ -614,6 +614,47 @@
         .visible {
             display: block !important;
         }
+
+        /* Animações para notificações */
+        @keyframes slideIn {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            0% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Estilos para o status de salvamento */
+        .status-salvamento {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .status-salvamento:hover {
+            background: rgba(0,0,0,0.9);
+        }
     </style>
 </head>
 <body>
@@ -714,9 +755,19 @@
                     <button onclick="adicionarDadosExemplo()" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 8px 15px; border-radius: 5px; margin: 5px; cursor: pointer;">
                         Adicionar Dados de Exemplo
                     </button>
-                    <button onclick="limparTodosDados()" style="background: rgba(220,53,69,0.8); border: 1px solid white; color: white; padding: 8px 15px; border-radius: 5px; margin: 5px; cursor: pointer;">
-                        Limpar Todos os Dados
+                    <button onclick="salvarDados()" style="background: rgba(40,167,69,0.8); border: 1px solid white; color: white; padding: 8px 15px; border-radius: 5px; margin: 5px; cursor: pointer;">
+                        💾 Salvar Dados
                     </button>
+                    <button onclick="exportarBackup()" style="background: rgba(0,123,255,0.8); border: 1px solid white; color: white; padding: 8px 15px; border-radius: 5px; margin: 5px; cursor: pointer;">
+                        📥 Baixar Backup
+                    </button>
+                    <button onclick="document.getElementById('fileInput').click()" style="background: rgba(255,193,7,0.8); border: 1px solid white; color: white; padding: 8px 15px; border-radius: 5px; margin: 5px; cursor: pointer;">
+                        📤 Carregar Backup
+                    </button>
+                    <button onclick="limparTodosDados()" style="background: rgba(220,53,69,0.8); border: 1px solid white; color: white; padding: 8px 15px; border-radius: 5px; margin: 5px; cursor: pointer;">
+                        🗑️ Limpar Todos os Dados
+                    </button>
+                    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="importarBackup(event)">
                 </div>
             </div>
 
@@ -1446,6 +1497,228 @@
 
         let usuarioLogado = false;
 
+        // === FUNÇÕES DE SALVAMENTO ===
+        function salvarDados() {
+            try {
+                const dadosParaSalvar = {
+                    ...dados,
+                    dataUltimaSalvamento: new Date().toISOString(),
+                    versaoSistema: '1.0'
+                };
+                
+                localStorage.setItem('sistemaFinanceiro_dados', JSON.stringify(dadosParaSalvar));
+                localStorage.setItem('sistemaFinanceiro_ultimoSalvamento', new Date().toLocaleString('pt-BR'));
+                
+                mostrarNotificacao('💾 Dados salvos com sucesso!', 'success');
+                atualizarStatusSalvamento();
+            } catch (error) {
+                console.error('Erro ao salvar dados:', error);
+                mostrarNotificacao('❌ Erro ao salvar dados!', 'error');
+            }
+        }
+
+        function carregarDados() {
+            try {
+                const dadosSalvos = localStorage.getItem('sistemaFinanceiro_dados');
+                if (dadosSalvos) {
+                    const dadosCarregados = JSON.parse(dadosSalvos);
+                    
+                    // Manter compatibilidade com versões antigas
+                    dados = {
+                        receitas: dadosCarregados.receitas || [],
+                        despesas: dadosCarregados.despesas || [],
+                        cirurgias: dadosCarregados.cirurgias || [],
+                        funcionarios: dadosCarregados.funcionarios || [],
+                        gastosFixos: dadosCarregados.gastosFixos || [],
+                        parcelas: dadosCarregados.parcelas || [],
+                        insumos: dadosCarregados.insumos || [],
+                        saldoAtual: dadosCarregados.saldoAtual || 0
+                    };
+                    
+                    mostrarNotificacao('📂 Dados carregados com sucesso!', 'success');
+                    atualizarStatusSalvamento();
+                    return true;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                mostrarNotificacao('❌ Erro ao carregar dados salvos!', 'error');
+            }
+            return false;
+        }
+
+        function salvarAutomatico() {
+            if (usuarioLogado) {
+                salvarDados();
+            }
+        }
+
+        function exportarBackup() {
+            try {
+                const backup = {
+                    ...dados,
+                    metadados: {
+                        dataExportacao: new Date().toISOString(),
+                        dataUltimaSalvamento: localStorage.getItem('sistemaFinanceiro_ultimoSalvamento'),
+                        versaoSistema: '1.0',
+                        nomeClinica: 'Clínica Oftalmológica Dr. Leonardo'
+                    }
+                };
+                
+                const dataStr = JSON.stringify(backup, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `backup_clinica_${new Date().toISOString().slice(0, 10)}.json`;
+                link.click();
+                
+                mostrarNotificacao('📥 Backup baixado com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao exportar backup:', error);
+                mostrarNotificacao('❌ Erro ao gerar backup!', 'error');
+            }
+        }
+
+        function importarBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!file.name.endsWith('.json')) {
+                mostrarNotificacao('❌ Arquivo deve ser .json!', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    // Validar estrutura do backup
+                    if (!backup.receitas && !backup.despesas && !backup.metadados) {
+                        throw new Error('Arquivo de backup inválido');
+                    }
+                    
+                    // Confirmar importação
+                    if (confirm('⚠️ Importar backup substituirá todos os dados atuais. Deseja continuar?')) {
+                        dados = {
+                            receitas: backup.receitas || [],
+                            despesas: backup.despesas || [],
+                            cirurgias: backup.cirurgias || [],
+                            funcionarios: backup.funcionarios || [],
+                            gastosFixos: backup.gastosFixos || [],
+                            parcelas: backup.parcelas || [],
+                            insumos: backup.insumos || [],
+                            saldoAtual: backup.saldoAtual || 0
+                        };
+                        
+                        salvarDados();
+                        atualizarTodasAsVisualizacoes();
+                        mostrarNotificacao('📤 Backup importado com sucesso!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Erro ao importar backup:', error);
+                    mostrarNotificacao('❌ Erro ao importar backup! Arquivo pode estar corrompido.', 'error');
+                }
+                
+                // Limpar input
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function mostrarNotificacao(mensagem, tipo = 'info') {
+            // Remover notificação anterior se existir
+            const notificacaoExistente = document.querySelector('.notificacao-sistema');
+            if (notificacaoExistente) {
+                notificacaoExistente.remove();
+            }
+            
+            const notificacao = document.createElement('div');
+            notificacao.className = 'notificacao-sistema';
+            notificacao.textContent = mensagem;
+            
+            // Estilos baseados no tipo
+            const cores = {
+                success: '#28a745',
+                error: '#dc3545',
+                info: '#17a2b8',
+                warning: '#ffc107'
+            };
+            
+            notificacao.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${cores[tipo] || cores.info};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-weight: 500;
+                max-width: 300px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            document.body.appendChild(notificacao);
+            
+            // Remover após 4 segundos
+            setTimeout(() => {
+                if (notificacao.parentNode) {
+                    notificacao.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => notificacao.remove(), 300);
+                }
+            }, 4000);
+        }
+
+        function atualizarStatusSalvamento() {
+            const ultimoSalvamento = localStorage.getItem('sistemaFinanceiro_ultimoSalvamento');
+            let statusElement = document.getElementById('statusSalvamento');
+            
+            if (!statusElement) {
+                statusElement = document.createElement('div');
+                statusElement.id = 'statusSalvamento';
+                statusElement.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: rgba(0,0,0,0.7);
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 5px;
+                    font-size: 12px;
+                    z-index: 1000;
+                `;
+                document.body.appendChild(statusElement);
+            }
+            
+            if (ultimoSalvamento) {
+                statusElement.textContent = `💾 Último salvamento: ${ultimoSalvamento}`;
+                statusElement.style.display = 'block';
+            } else {
+                statusElement.style.display = 'none';
+            }
+        }
+
+        function atualizarTodasAsVisualizacoes() {
+            if (!usuarioLogado) return;
+            
+            atualizarDashboard();
+            atualizarListaReceitas();
+            atualizarListaDespesas();
+            atualizarListaCirurgias();
+            atualizarResumoCirurgias();
+            atualizarListaFuncionarios();
+            atualizarResumoFuncionarios();
+            atualizarListaGastosFixos();
+            atualizarResumoGastosFixos();
+            atualizarListaParcelas();
+            atualizarResumoParcelas();
+            atualizarListaInsumos();
+            atualizarResumoInsumos();
+            atualizarFinanceiro();
+        }
+
         // === FUNÇÕES DE LOGIN ===
         function togglePassword() {
             const passwordInput = document.getElementById('password');
@@ -1517,7 +1790,12 @@
             // CORRIGIDO: Usar classes em vez de style.display
             document.getElementById('telaLogin').className = 'hidden';
             document.getElementById('telaSistema').className = 'visible';
+            
+            // Carregar dados salvos
+            carregarDados();
+            
             atualizarDashboard();
+            atualizarStatusSalvamento();
         }
 
         function mostrarErro(mensagem) {
@@ -1759,7 +2037,10 @@
             dados.saldoAtual = novoSaldo;
             atualizarFinanceiro();
             atualizarDashboard();
-            alert('Saldo atualizado com sucesso!');
+            
+            // Salvamento automático
+            salvarAutomatico();
+            mostrarNotificacao('💰 Saldo atualizado com sucesso!', 'success');
         }
 
         function adicionarDadosExemplo() {
@@ -2014,17 +2295,17 @@
                 // Subtrair insumos da Ana Costa (realizada)
                 dados.insumos[0].quantidade -= 2; // Seringa: 46 - 2 = 44
                 dados.insumos[2].quantidade -= 2; // Gaze: 29 - 2 = 27
-                // Lubrificante já calculado proporcionalmente
                 
-                dados.saldoAtual = 15000;
-
                 dados.saldoAtual = 15000;
                 
                 // Atualizar todas as visualizações
                 atualizarDashboard();
                 atualizarListaReceitas();
                 atualizarListaDespesas();
-                alert('Dados de exemplo adicionados com sucesso! Explore todas as abas para ver as funcionalidades. Agora os funcionários por dia são gerenciados na aba Funcionários.');
+                
+                // Salvamento automático
+                salvarAutomatico();
+                mostrarNotificacao('🎯 Dados de exemplo adicionados com sucesso! Explore todas as abas para ver as funcionalidades.', 'success');
             }
         }
 
@@ -2369,7 +2650,10 @@
                 atualizarListaInsumos();
                 atualizarResumoInsumos();
                 atualizarDashboard();
-                alert('Cirurgia excluída com sucesso!');
+                
+                // Salvamento automático
+                salvarAutomatico();
+                mostrarNotificacao('🗑️ Cirurgia excluída com sucesso!', 'warning');
             }
         }
 
@@ -2420,7 +2704,10 @@
                 atualizarResumoFuncionarios();
                 // Recalcular cirurgias se necessário
                 calcularResumoFinanceiro();
-                alert('Funcionário excluído com sucesso!');
+                
+                // Salvamento automático
+                salvarAutomatico();
+                mostrarNotificacao('🗑️ Funcionário excluído com sucesso!', 'warning');
             }
         }
 
@@ -2457,7 +2744,10 @@
                 dados.gastosFixos = dados.gastosFixos.filter(g => g.id !== id);
                 atualizarListaGastosFixos();
                 atualizarResumoGastosFixos();
-                alert('Gasto fixo excluído com sucesso!');
+                
+                // Salvamento automático
+                salvarAutomatico();
+                mostrarNotificacao('🗑️ Gasto fixo excluído com sucesso!', 'warning');
             }
         }
 
@@ -2500,7 +2790,10 @@
                 dados.parcelas = dados.parcelas.filter(p => p.id !== id);
                 atualizarListaParcelas();
                 atualizarResumoParcelas();
-                alert('Parcela excluída com sucesso!');
+                
+                // Salvamento automático
+                salvarAutomatico();
+                mostrarNotificacao('🗑️ Parcela excluída com sucesso!', 'warning');
             }
         }
 
@@ -2540,7 +2833,10 @@
                 dados.insumos = dados.insumos.filter(i => i.id !== id);
                 atualizarListaInsumos();
                 atualizarResumoInsumos();
-                alert('Insumo excluído com sucesso!');
+                
+                // Salvamento automático
+                salvarAutomatico();
+                mostrarNotificacao('🗑️ Insumo excluído com sucesso!', 'warning');
             }
         }
 
@@ -2651,21 +2947,27 @@
         function limparTodosDados() {
             if (!usuarioLogado) return;
             
-            if (confirm('Tem certeza que deseja limpar todos os dados?')) {
-                dados = {
-                    receitas: [],
-                    despesas: [],
-                    cirurgias: [],
-                    funcionarios: [],
-                    gastosFixos: [],
-                    parcelas: [],
-                    insumos: [],
-                    saldoAtual: 0
-                };
-                atualizarDashboard();
-                atualizarListaReceitas();
-                atualizarListaDespesas();
-                alert('Todos os dados foram limpos!');
+            if (confirm('⚠️ ATENÇÃO: Esta ação irá excluir todos os dados salvos permanentemente!\n\nDeseja continuar?')) {
+                if (confirm('🚨 ÚLTIMA CONFIRMAÇÃO: Todos os dados serão perdidos. Tem certeza absoluta?')) {
+                    dados = {
+                        receitas: [],
+                        despesas: [],
+                        cirurgias: [],
+                        funcionarios: [],
+                        gastosFixos: [],
+                        parcelas: [],
+                        insumos: [],
+                        saldoAtual: 0
+                    };
+                    
+                    // Limpar dados salvos
+                    localStorage.removeItem('sistemaFinanceiro_dados');
+                    localStorage.removeItem('sistemaFinanceiro_ultimoSalvamento');
+                    
+                    atualizarTodasAsVisualizacoes();
+                    atualizarStatusSalvamento();
+                    mostrarNotificacao('🗑️ Todos os dados foram limpos!', 'warning');
+                }
             }
         }
 
@@ -2678,7 +2980,10 @@
                 });
                 atualizarListaReceitas();
                 atualizarDashboard();
-                alert('Receita excluida com sucesso!');
+                
+                // Salvamento automático
+                salvarAutomatico();
+                mostrarNotificacao('🗑️ Receita excluída com sucesso!', 'warning');
             }
         }
 
@@ -2691,7 +2996,10 @@
                 });
                 atualizarListaDespesas();
                 atualizarDashboard();
-                alert('Despesa excluida com sucesso!');
+                
+                // Salvamento automático
+                salvarAutomatico();
+                mostrarNotificacao('🗑️ Despesa excluída com sucesso!', 'warning');
             }
         }
 
@@ -2722,7 +3030,10 @@
             e.target.querySelector('input[type="date"]').value = new Date().toISOString().slice(0, 10);
             atualizarListaReceitas();
             atualizarDashboard();
-            alert('Receita adicionada com sucesso!');
+            
+            // Salvamento automático
+            salvarAutomatico();
+            mostrarNotificacao('💰 Receita adicionada com sucesso!', 'success');
         });
 
         // Form de despesas
@@ -2746,7 +3057,10 @@
             e.target.querySelector('input[type="date"]').value = new Date().toISOString().slice(0, 10);
             atualizarListaDespesas();
             atualizarDashboard();
-            alert('Despesa adicionada com sucesso!');
+            
+            // Salvamento automático
+            salvarAutomatico();
+            mostrarNotificacao('💸 Despesa adicionada com sucesso!', 'success');
         });
 
         // Form de cirurgias
@@ -2806,7 +3120,10 @@
             atualizarListaInsumos();
             atualizarResumoInsumos();
             atualizarDashboard();
-            alert('Cirurgia registrada com sucesso!');
+            
+            // Salvamento automático
+            salvarAutomatico();
+            mostrarNotificacao('🏥 Cirurgia registrada com sucesso!', 'success');
         });
 
         // Form de funcionários
@@ -2847,7 +3164,9 @@
             // Recalcular custos de cirurgias se houver funcionários por dia
             calcularResumoFinanceiro();
             
-            alert('Funcionário registrado com sucesso!');
+            // Salvamento automático
+            salvarAutomatico();
+            mostrarNotificacao('👤 Funcionário registrado com sucesso!', 'success');
         });
 
         // Form de gastos fixos
@@ -2870,7 +3189,10 @@
             e.target.reset();
             atualizarListaGastosFixos();
             atualizarResumoGastosFixos();
-            alert('Gasto fixo adicionado com sucesso!');
+            
+            // Salvamento automático
+            salvarAutomatico();
+            mostrarNotificacao('📋 Gasto fixo adicionado com sucesso!', 'success');
         });
 
         // Form de parcelas
@@ -2895,7 +3217,10 @@
             e.target.querySelector('input[type="date"]').value = new Date().toISOString().slice(0, 10);
             atualizarListaParcelas();
             atualizarResumoParcelas();
-            alert('Parcela registrada com sucesso!');
+            
+            // Salvamento automático
+            salvarAutomatico();
+            mostrarNotificacao('📝 Parcela registrada com sucesso!', 'success');
         });
 
         // Form de insumos
@@ -2920,7 +3245,10 @@
             e.target.reset();
             atualizarListaInsumos();
             atualizarResumoInsumos();
-            alert('Insumo adicionado com sucesso!');
+            
+            // Salvamento automático
+            salvarAutomatico();
+            mostrarNotificacao('📦 Insumo adicionado com sucesso!', 'success');
         });
 
         // Atalhos de teclado
@@ -2948,8 +3276,14 @@
             // Configurar eventos para funcionários
             configurarEventosFuncionarios();
             
+            // Tentar carregar dados salvos na inicialização
+            carregarDados();
+            
             // Inicializar na tela de login
             mostrarLogin();
+            
+            // Atualizar status de salvamento
+            atualizarStatusSalvamento();
         });
 
         function configurarEventosCirurgia() {
