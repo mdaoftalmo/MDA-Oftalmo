@@ -3333,56 +3333,73 @@
                 }
             });
         }
-    </script>
+    </script> <script>
+    // === CONFIGURAÇÕES DE CONEXÃO (JSONBIN.IO) ===
+    const JSONBIN_API_KEY = '$2a$10$q9sf3/eV8lgMSZzM9uXCc.BWlEh0s/Z6lglxrbGui576BRWrmhB6O'; // Cole a chave que você copiou
+    const JSONBIN_BIN_ID = '686433dc8561e97a502fd60e'; // Cole o ID do seu bin
+    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    // === CONFIGURAÇÕES DE LOGIN ===
+    const USUARIO_VALIDO = 'leosht';
+    // ... resto do seu código ...
+    
+</script>
+    // === FUNÇÕES DE SALVAMENTO (ATUALIZADAS PARA JSONBIN.IO) ===
 
-  // ⚙️ SUA CONFIG FIREBASE
-  const firebaseConfig = 
-  apiKey: "AIzaSyCO9v81263sTNJ-4KUqP1RD27KFDys5bTU",
-  authDomain: "clinica-e025d.firebaseapp.com",
-  projectId: "clinica-e025d",
-  storageBucket: "clinica-e025d.firebasestorage.app",
-  messagingSenderId: "915747797153",
-  appId: "1:915747797153:web:06090c8fd4b71f90e318e0"
+async function salvarDados() {
+    // Mostra um feedback visual de que está salvando
+    mostrarNotificacao('Salvando na nuvem...', 'info');
+
+    try {
+        const response = await fetch(JSONBIN_URL, {
+            method: 'PUT', // PUT substitui completamente o conteúdo do bin
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': JSONBIN_API_KEY
+            },
+            body: JSON.stringify(dados) // Envia o objeto 'dados' inteiro como texto
+        });
+
+        if (!response.ok) {
+            // Se a resposta não for OK (ex: erro de chave), lança um erro
+            const errorData = await response.json();
+            throw new Error(errorData.message);
+        }
+
+        mostrarNotificacao('☁️ Dados salvos na nuvem com sucesso!', 'success');
+
+    } catch (error) {
+        console.error('Erro ao salvar no JSONBin.io:', error);
+        mostrarNotificacao(`❌ Erro ao salvar: ${error.message}`, 'error');
+    }
 }
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // Função para salvar dados no Firestore
-  async function salvarDadosFirebase(dados) {
+async function carregarDados() {
     try {
-      await setDoc(doc(db, "clinicaFinanceiro", "dadosSistema"), dados);
-      console.log("✅ Dados salvos no Firestore!");
-    } catch (e) {
-      console.error("Erro ao salvar:", e);
+        const response = await fetch(`${JSONBIN_URL}/latest`, { // Usa /latest para obter a versão mais recente
+            method: 'GET',
+            headers: {
+                'X-Master-Key': JSONBIN_API_KEY
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message);
+        }
+
+        const jsonResponse = await response.json();
+
+        // O JSONBin envolve seus dados em uma propriedade chamada "record"
+        if (jsonResponse.record) {
+            dados = jsonResponse.record;
+            mostrarNotificacao('☁️ Dados carregados da nuvem!', 'info');
+        }
+
+    } catch (error) {
+        console.error('Erro ao carregar do JSONBin.io:', error);
+        mostrarNotificacao(`❌ Erro ao carregar: ${error.message}`, 'error');
     }
-  }
+}
 
-  // Função para carregar dados do Firestore
-  async function carregarDadosFirebase() {
-    try {
-      const docRef = doc(db, "clinicaFinanceiro", "dadosSistema");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        console.log("✅ Dados carregados:", docSnap.data());
-        return docSnap.data();
-      } else {
-        console.log("⚠️ Nenhum dado salvo no Firestore.");
-        return null;
-      }
-    } catch (e) {
-      console.error("Erro ao carregar:", e);
-    }
-  }
 
-  // Expondo para uso global
-  window.salvarDadosFirebase = salvarDadosFirebase;
-  window.carregarDadosFirebase = carregarDadosFirebase;
-</script>
-
-</body>
-</html>
