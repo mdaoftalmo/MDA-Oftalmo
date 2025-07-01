@@ -658,7 +658,6 @@
     </style>
 </head>
 <body>
-    <!-- TELA DE LOGIN -->
     <div id="telaLogin" class="visible">
         <div class="login-container">
             <div class="login-left">
@@ -744,7 +743,6 @@
         </div>
     </div>
 
-    <!-- SISTEMA FINANCEIRO -->
     <div id="telaSistema" class="hidden">
         <div class="sistema-container">
             <div class="header">
@@ -784,7 +782,6 @@
                 <div class="tab" onclick="abrirAba('relatorios')">Relatorios</div>
             </div>
 
-            <!-- Dashboard -->
             <div id="dashboard" class="tab-content active">
                 <div class="summary-cards">
                     <div class="summary-card">
@@ -826,7 +823,6 @@
                 </div>
             </div>
 
-            <!-- Receitas -->
             <div id="receitas" class="tab-content">
                 <div class="card">
                     <h3>Registrar Receita</h3>
@@ -871,7 +867,6 @@
                 </div>
             </div>
 
-            <!-- Despesas -->
             <div id="despesas" class="tab-content">
                 <div class="card">
                     <h3>Registrar Despesa</h3>
@@ -915,7 +910,6 @@
                 </div>
             </div>
 
-            <!-- Financeiro -->
             <div id="financeiro" class="tab-content">
                 <div class="card">
                     <h3>Controle de Saldo</h3>
@@ -944,7 +938,6 @@
                 </div>
             </div>
 
-            <!-- Cirurgias -->
             <div id="cirurgias" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -997,7 +990,6 @@
                                 </select>
                             </div>
 
-                            <!-- Seção de Custos Operacionais -->
                             <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 15px 0;">
                                 <h4>Custos Operacionais</h4>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
@@ -1031,7 +1023,6 @@
                                 </div>
                             </div>
 
-                            <!-- Seção de Insumos -->
                             <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 15px 0;">
                                 <h4>Insumos Utilizados</h4>
                                 <div id="insumosUtilizados">
@@ -1054,7 +1045,6 @@
                                 </div>
                             </div>
 
-                            <!-- Resumo Financeiro -->
                             <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 15px 0; background: #f8f9fa;">
                                 <h4>Resumo Financeiro Completo</h4>
                                 <div class="valor-detalhado">
@@ -1151,7 +1141,6 @@
                 </div>
             </div>
 
-            <!-- Funcionários -->
             <div id="funcionarios" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -1236,7 +1225,6 @@
                 </div>
             </div>
 
-            <!-- Gastos Fixos -->
             <div id="gastosFixos" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -1295,7 +1283,6 @@
                 </div>
             </div>
 
-            <!-- Parcelas -->
             <div id="parcelas" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -1360,7 +1347,6 @@
                 </div>
             </div>
 
-            <!-- Insumos -->
             <div id="insumos" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -1434,7 +1420,6 @@
                 </div>
             </div>
 
-            <!-- Relatórios -->
             <div id="relatorios" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -3349,5 +3334,52 @@
             });
         }
     </script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+  // ⚙️ SUA CONFIG FIREBASE
+  const firebaseConfig = {
+    apiKey: "SAIzaSyBmzkoQwDdCpvPe_qzP0d6kFGjc2-YST9sPI_KEY",
+    authDomain: "clinicafinanceiro-85cec.firebaseapp.com",
+    projectId: "clinicafinanceiro-85cec.firebaseapp.com_ID",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Função para salvar dados no Firestore
+  async function salvarDadosFirebase(dados) {
+    try {
+      await setDoc(doc(db, "clinicaFinanceiro", "dadosSistema"), dados);
+      console.log("✅ Dados salvos no Firestore!");
+    } catch (e) {
+      console.error("Erro ao salvar:", e);
+    }
+  }
+
+  // Função para carregar dados do Firestore
+  async function carregarDadosFirebase() {
+    try {
+      const docRef = doc(db, "clinicaFinanceiro", "dadosSistema");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        console.log("✅ Dados carregados:", docSnap.data());
+        return docSnap.data();
+      } else {
+        console.log("⚠️ Nenhum dado salvo no Firestore.");
+        return null;
+      }
+    } catch (e) {
+      console.error("Erro ao carregar:", e);
+    }
+  }
+
+  // Expondo para uso global
+  window.salvarDadosFirebase = salvarDadosFirebase;
+  window.carregarDadosFirebase = carregarDadosFirebase;
+</script>
+
 </body>
 </html>
