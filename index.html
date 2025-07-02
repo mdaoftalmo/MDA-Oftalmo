@@ -3350,55 +3350,61 @@
         }
     </script>
 
+
 <!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
-  // ⚙️ SUA CONFIG FIREBASE
+<script>
+  // 🔑 Sua configuração do Firebase
   const firebaseConfig = {
-  apiKey: "AIzaSyD1ruP7W5uYL185rOUnFqHd9GUlDp4VhXs",
-  authDomain: "clinica-981e8.firebaseapp.com",
-  databaseURL: "https://clinica-981e8-default-rtdb.firebaseio.com",
-  projectId: "clinica-981e8",
-  storageBucket: "clinica-981e8.firebasestorage.app",
-  messagingSenderId: "766482530366",
-  appId: "1:766482530366:web:31321baff2da7a8623916f"
-}
+    apiKey: "AIzaSyD1ruP7W5uYL185rOUnFqHd9GUlDp4VhXs",
+    authDomain: "clinica-981e8.firebaseapp.com",
+    databaseURL: "https://clinica-981e8-default-rtdb.firebaseio.com",
+    projectId: "clinica-981e8",
+    storageBucket: "clinica-981e8.firebasestorage.app",
+    messagingSenderId: "766482530366",
+    appId: "1:766482530366:web:31321baff2da7a8623916f"
+  };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  // Inicializa Firebase
+  firebase.initializeApp(firebaseConfig);
 
-  // Função para salvar dados no Firestore
-  async function salvarDadosFirebase(dados) {
-    try {
-      await setDoc(doc(db, "clinicaFinanceiro", "dadosSistema"), dados);
-      console.log("✅ Dados salvos no Firestore!");
-    } catch (e) {
-      console.error("Erro ao salvar:", e);
-    }
+  // Referência do Realtime Database
+  const database = firebase.database();
+
+  // === FUNÇÃO PARA SALVAR DADOS ===
+  function salvarDados() {
+    database.ref('sistemaFinanceiro').set(dados)
+      .then(() => {
+        mostrarNotificacao('💾 Dados salvos na nuvem!', 'success');
+        atualizarStatusSalvamento();
+      })
+      .catch((error) => {
+        console.error(error);
+        mostrarNotificacao('❌ Erro ao salvar na nuvem!', 'error');
+      });
   }
 
-  // Função para carregar dados do Firestore
-  async function carregarDadosFirebase() {
-    try {
-      const docRef = doc(db, "clinicaFinanceiro", "dadosSistema");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        console.log("✅ Dados carregados:", docSnap.data());
-        return docSnap.data();
-      } else {
-        console.log("⚠️ Nenhum dado salvo no Firestore.");
-        return null;
-      }
-    } catch (e) {
-      console.error("Erro ao carregar:", e);
-    }
+  // === FUNÇÃO PARA CARREGAR DADOS ===
+  function carregarDados() {
+    database.ref('sistemaFinanceiro').once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          dados = snapshot.val();
+          atualizarTodasAsVisualizacoes();
+          mostrarNotificacao('📂 Dados carregados da nuvem!', 'success');
+        } else {
+          mostrarNotificacao('⚠️ Nenhum dado encontrado na nuvem!', 'warning');
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        mostrarNotificacao('❌ Erro ao carregar da nuvem!', 'error');
+      });
   }
+>
 
-  // Expondo para uso global
-  window.salvarDadosFirebase = salvarDadosFirebase;
-  window.carregarDadosFirebase = carregarDadosFirebase;
 </script>
 
 <html lang="pt-BR">
@@ -3425,26 +3431,35 @@
       alert(tipo.toUpperCase() + ": " + msg);
     }
 
-    function salvarDados() {
-      const userId = 'leosht';
-      firebase.database().ref('usuarios/' + userId).set(dados)
-        .then(() => mostrarNotificacao('Dados salvos no Firebase!', 'sucesso'))
-        .catch((e) => mostrarNotificacao('Erro ao salvar!', 'erro'));
-    }
+   function salvarDados() {
+  database.ref('sistemaFinanceiro').set(dados)
+    .then(() => {
+      mostrarNotificacao('💾 Dados salvos na nuvem!', 'success');
+      atualizarStatusSalvamento();
+    })
+    .catch((error) => {
+      console.error(error);
+      mostrarNotificacao('❌ Erro ao salvar na nuvem!', 'error');
+    });
+}
+
 
     function carregarDados() {
-      const userId = 'leosht';
-      firebase.database().ref('usuarios/' + userId).once('value')
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            dados = snapshot.val();
-            mostrarNotificacao('Dados carregados do Firebase!', 'sucesso');
-            console.log(dados);
-          } else {
-            mostrarNotificacao('Nenhum dado encontrado.', 'info');
-          }
-        })
-        .catch((e) => mostrarNotificacao('Erro ao carregar!', 'erro'));
-    }
+  database.ref('sistemaFinanceiro').once('value')
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        dados = snapshot.val();
+        atualizarTodasAsVisualizacoes();
+        mostrarNotificacao('📂 Dados carregados da nuvem!', 'success');
+      } else {
+        mostrarNotificacao('⚠️ Nenhum dado encontrado na nuvem!', 'warning');
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      mostrarNotificacao('❌ Erro ao carregar da nuvem!', 'error');
+    });
+}
+
 
 
