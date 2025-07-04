@@ -3350,10 +3350,9 @@
         }
     </script>
 
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<!-- Firebase SDK - Use apenas uma vez no final do body -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
   // 🔑 Sua configuração do Firebase
@@ -3368,98 +3367,114 @@
   };
 
   // Inicializa Firebase
-  firebase.initializeApp(firebaseConfig);
-
-  // Referência do Realtime Database
+  const app = firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
 
-  // === FUNÇÃO PARA SALVAR DADOS ===
-  function salvarDados() {
+  // === FUNÇÕES ATUALIZADAS PARA FIREBASE ===
+  function salvarDadosFirebase() {
     database.ref('sistemaFinanceiro').set(dados)
       .then(() => {
-        mostrarNotificacao('💾 Dados salvos na nuvem!', 'success');
+        mostrarNotificacao('💾 Dados salvos na nuvem com sucesso!', 'success');
+        localStorage.setItem('sistemaFinanceiro_ultimoSalvamento', new Date().toLocaleString('pt-BR'));
         atualizarStatusSalvamento();
       })
       .catch((error) => {
-        console.error(error);
-        mostrarNotificacao('❌ Erro ao salvar na nuvem!', 'error');
+        console.error("Erro ao salvar no Firebase:", error);
+        mostrarNotificacao('❌ Erro ao salvar na nuvem! Salvando localmente...', 'error');
+        // Fallback para localStorage
+        salvarDadosLocal();
       });
   }
 
-  // === FUNÇÃO PARA CARREGAR DADOS ===
-  function carregarDados() {
+  function carregarDadosFirebase() {
     database.ref('sistemaFinanceiro').once('value')
       .then((snapshot) => {
         if (snapshot.exists()) {
-          dados = snapshot.val();
+          dados = {
+            receitas: snapshot.val().receitas || [],
+            despesas: snapshot.val().despesas || [],
+            cirurgias: snapshot.val().cirurgias || [],
+            funcionarios: snapshot.val().funcionarios || [],
+            gastosFixos: snapshot.val().gastosFixos || [],
+            parcelas: snapshot.val().parcelas || [],
+            insumos: snapshot.val().insumos || [],
+            saldoAtual: snapshot.val().saldoAtual || 0
+          };
+          
+          mostrarNotificacao('📂 Dados carregados da nuvem com sucesso!', 'success');
           atualizarTodasAsVisualizacoes();
-          mostrarNotificacao('📂 Dados carregados da nuvem!', 'success');
         } else {
-          mostrarNotificacao('⚠️ Nenhum dado encontrado na nuvem!', 'warning');
+          mostrarNotificacao('⚠️ Nenhum dado encontrado na nuvem. Carregando dados locais...', 'warning');
+          carregarDadosLocal();
         }
       })
       .catch((error) => {
-        console.error(error);
-        mostrarNotificacao('❌ Erro ao carregar da nuvem!', 'error');
+        console.error("Erro ao carregar do Firebase:", error);
+        mostrarNotificacao('❌ Erro ao carregar da nuvem! Carregando dados locais...', 'error');
+        carregarDadosLocal();
       });
   }
->
 
-</script>
-
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clínica Dr. Leonardo</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="firebase-config.js"></script>
-</head>
-<body>
-  <h1>Sistema Financeiro</h1>
-  <button onclick="salvarDados()">Salvar Dados</button>
-  <button onclick="carregarDados()">Carregar Dados</button>
-
-  <script>
-    let dados = {
-      receitas: [{ descricao: "Consulta", valor: 200, data: "2025-07-01" }],
-      despesas: [{ descricao: "Material", valor: 50, data: "2025-07-01" }]
-    };
-
-    function mostrarNotificacao(msg, tipo) {
-      alert(tipo.toUpperCase() + ": " + msg);
+  // Modifique suas funções originais para usar as versões do Firebase
+  function salvarDados() {
+    if (navigator.onLine) {
+      salvarDadosFirebase();
+    } else {
+      salvarDadosLocal();
+      mostrarNotificacao('⚠️ Você está offline. Dados salvos localmente.', 'warning');
     }
+  }
 
-   function salvarDados() {
-  database.ref('sistemaFinanceiro').set(dados)
-    .then(() => {
-      mostrarNotificacao('💾 Dados salvos na nuvem!', 'success');
+  function carregarDados() {
+    if (navigator.onLine) {
+      carregarDadosFirebase();
+    } else {
+      carregarDadosLocal();
+      mostrarNotificacao('⚠️ Você está offline. Carregando dados locais.', 'warning');
+    }
+  }
+
+  // Funções locais originais (renomeadas)
+  function salvarDadosLocal() {
+    try {
+      const dadosParaSalvar = {
+        ...dados,
+        dataUltimaSalvamento: new Date().toISOString(),
+        versaoSistema: '1.0'
+      };
+      
+      localStorage.setItem('sistemaFinanceiro_dados', JSON.stringify(dadosParaSalvar));
+      localStorage.setItem('sistemaFinanceiro_ultimoSalvamento', new Date().toLocaleString('pt-BR'));
+      
       atualizarStatusSalvamento();
-    })
-    .catch((error) => {
-      console.error(error);
-      mostrarNotificacao('❌ Erro ao salvar na nuvem!', 'error');
-    });
-}
+    } catch (error) {
+      console.error('Erro ao salvar dados localmente:', error);
+    }
+  }
 
-
-    function carregarDados() {
-  database.ref('sistemaFinanceiro').once('value')
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        dados = snapshot.val();
-        atualizarTodasAsVisualizacoes();
-        mostrarNotificacao('📂 Dados carregados da nuvem!', 'success');
-      } else {
-        mostrarNotificacao('⚠️ Nenhum dado encontrado na nuvem!', 'warning');
+  function carregarDadosLocal() {
+    try {
+      const dadosSalvos = localStorage.getItem('sistemaFinanceiro_dados');
+      if (dadosSalvos) {
+        const dadosCarregados = JSON.parse(dadosSalvos);
+        
+        dados = {
+          receitas: dadosCarregados.receitas || [],
+          despesas: dadosCarregados.despesas || [],
+          cirurgias: dadosCarregados.cirurgias || [],
+          funcionarios: dadosCarregados.funcionarios || [],
+          gastosFixos: dadosCarregados.gastosFixos || [],
+          parcelas: dadosCarregados.parcelas || [],
+          insumos: dadosCarregados.insumos || [],
+          saldoAtual: dadosCarregados.saldoAtual || 0
+        };
+        
+        return true;
       }
-    })
-    .catch((error) => {
-      console.error(error);
-      mostrarNotificacao('❌ Erro ao carregar da nuvem!', 'error');
-    });
-}
-
+    } catch (error) {
+      console.error('Erro ao carregar dados locais:', error);
+    }
+    return false;
+  }
 
 
