@@ -3351,78 +3351,58 @@
     </script>
 
 
-<!-- Firebase App (base) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<!-- Firebase Database -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
 <script>
+  // 🔑 Sua configuração do Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyD1ruP7W5uYL185rOUnFqHd9GUlDp4VhXs",
     authDomain: "clinica-981e8.firebaseapp.com",
     databaseURL: "https://clinica-981e8-default-rtdb.firebaseio.com",
     projectId: "clinica-981e8",
-    storageBucket: "clinica-981e8.appspot.com",
+    storageBucket: "clinica-981e8.firebasestorage.app",
     messagingSenderId: "766482530366",
     appId: "1:766482530366:web:31321baff2da7a8623916f"
   };
 
+  // Inicializa Firebase
   firebase.initializeApp(firebaseConfig);
+
+  // Referência do Realtime Database
   const database = firebase.database();
-</script>
 
- function salvarDados() {
-  try {
-    const dadosParaSalvar = {
-      ...dados,
-      dataUltimaSalvamento: new Date().toISOString(),
-      versaoSistema: '1.0'
-    };
-
-    // Firebase
-    firebase.database().ref('clinica/financeiro').set(dadosParaSalvar)
+  // === FUNÇÃO PARA SALVAR DADOS ===
+  function salvarDados() {
+    database.ref('sistemaFinanceiro').set(dados)
       .then(() => {
-        mostrarNotificacao('✅ Dados salvos no Firebase!', 'success');
+        mostrarNotificacao('💾 Dados salvos na nuvem!', 'success');
         atualizarStatusSalvamento();
       })
       .catch((error) => {
-        console.error('Erro ao salvar no Firebase:', error);
-        mostrarNotificacao('❌ Erro ao salvar no Firebase!', 'error');
+        console.error(error);
+        mostrarNotificacao('❌ Erro ao salvar na nuvem!', 'error');
       });
-  } catch (error) {
-    console.error('Erro geral:', error);
-    mostrarNotificacao('❌ Erro ao salvar os dados!', 'error');
   }
 
- function carregarDados() {
-  try {
-    firebase.database().ref('clinica/financeiro').once('value')
-      .then(snapshot => {
+  // === FUNÇÃO PARA CARREGAR DADOS ===
+  function carregarDados() {
+    database.ref('sistemaFinanceiro').once('value')
+      .then((snapshot) => {
         if (snapshot.exists()) {
-          const dadosCarregados = snapshot.val();
-          dados = {
-            receitas: dadosCarregados.receitas || [],
-            despesas: dadosCarregados.despesas || [],
-            cirurgias: dadosCarregados.cirurgias || [],
-            funcionarios: dadosCarregados.funcionarios || [],
-            gastosFixos: dadosCarregados.gastosFixos || [],
-            parcelas: dadosCarregados.parcelas || [],
-            insumos: dadosCarregados.insumos || [],
-            saldoAtual: dadosCarregados.saldoAtual || 0
-          };
-          atualizarStatusSalvamento();
+          dados = snapshot.val();
           atualizarTodasAsVisualizacoes();
-          mostrarNotificacao('📥 Dados carregados do Firebase!', 'success');
+          mostrarNotificacao('📂 Dados carregados da nuvem!', 'success');
+        } else {
+          mostrarNotificacao('⚠️ Nenhum dado encontrado na nuvem!', 'warning');
         }
       })
-      .catch(error => {
-        console.error('Erro ao carregar do Firebase:', error);
-        mostrarNotificacao('❌ Erro ao carregar do Firebase!', 'error');
+      .catch((error) => {
+        console.error(error);
+        mostrarNotificacao('❌ Erro ao carregar da nuvem!', 'error');
       });
-  } catch (error) {
-    console.error('Erro geral ao carregar:', error);
-  }}
-
+  }
 >
 
 </script>
