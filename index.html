@@ -3350,12 +3350,12 @@
         }
     </script>
 
-<!-- Firebase SDK - Use apenas uma vez no final do body -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-  // 🔑 Sua configuração do Firebase
+  // Configuracao Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyD1ruP7W5uYL185rOUnFqHd9GUlDp4VhXs",
     authDomain: "clinica-981e8.firebaseapp.com",
@@ -3366,75 +3366,37 @@
     appId: "1:766482530366:web:31321baff2da7a8623916f"
   };
 
-  // Inicializa Firebase
+  // Inicializar Firebase
   const app = firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
 
-  // === FUNÇÕES ATUALIZADAS PARA FIREBASE ===
-  function salvarDadosFirebase() {
-    database.ref('sistemaFinanceiro').set(dados)
-      .then(() => {
-        mostrarNotificacao('💾 Dados salvos na nuvem com sucesso!', 'success');
-        localStorage.setItem('sistemaFinanceiro_ultimoSalvamento', new Date().toLocaleString('pt-BR'));
-        atualizarStatusSalvamento();
-      })
-      .catch((error) => {
-        console.error("Erro ao salvar no Firebase:", error);
-        mostrarNotificacao('❌ Erro ao salvar na nuvem! Salvando localmente...', 'error');
-        // Fallback para localStorage
-        salvarDadosLocal();
-      });
-  }
-
-  function carregarDadosFirebase() {
-    database.ref('sistemaFinanceiro').once('value')
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          dados = {
-            receitas: snapshot.val().receitas || [],
-            despesas: snapshot.val().despesas || [],
-            cirurgias: snapshot.val().cirurgias || [],
-            funcionarios: snapshot.val().funcionarios || [],
-            gastosFixos: snapshot.val().gastosFixos || [],
-            parcelas: snapshot.val().parcelas || [],
-            insumos: snapshot.val().insumos || [],
-            saldoAtual: snapshot.val().saldoAtual || 0
-          };
-          
-          mostrarNotificacao('📂 Dados carregados da nuvem com sucesso!', 'success');
-          atualizarTodasAsVisualizacoes();
-        } else {
-          mostrarNotificacao('⚠️ Nenhum dado encontrado na nuvem. Carregando dados locais...', 'warning');
-          carregarDadosLocal();
-        }
-      })
-      .catch((error) => {
-        console.error("Erro ao carregar do Firebase:", error);
-        mostrarNotificacao('❌ Erro ao carregar da nuvem! Carregando dados locais...', 'error');
-        carregarDadosLocal();
-      });
-  }
-
-  // Modifique suas funções originais para usar as versões do Firebase
+  // Sobrescreve a funcao salvarDados para incluir Firebase
   function salvarDados() {
-    if (navigator.onLine) {
-      salvarDadosFirebase();
-    } else {
-      salvarDadosLocal();
-      mostrarNotificacao('⚠️ Você está offline. Dados salvos localmente.', 'warning');
+    try {
+      const dadosParaSalvar = {
+        ...dados,
+        dataUltimaSalvamento: new Date().toISOString(),
+        versaoSistema: '1.0'
+      };
+
+      // Tenta salvar na nuvem
+      database.ref('sistemaFinanceiro').set(dadosParaSalvar)
+        .then(() => {
+          mostrarNotificacao('💾 Dados salvos na nuvem com sucesso!', 'success');
+          localStorage.setItem('sistemaFinanceiro_ultimoSalvamento', new Date().toLocaleString('pt-BR'));
+          atualizarStatusSalvamento();
+        })
+        .catch((error) => {
+          console.error('Erro ao salvar no Firebase:', error);
+          mostrarNotificacao('❌ Erro ao salvar na nuvem! Salvando localmente...', 'error');
+          salvarDadosLocal();
+        });
+    } catch (error) {
+      console.error('Erro inesperado ao salvar dados:', error);
+      mostrarNotificacao('❌ Erro inesperado!', 'error');
     }
   }
 
-  function carregarDados() {
-    if (navigator.onLine) {
-      carregarDadosFirebase();
-    } else {
-      carregarDadosLocal();
-      mostrarNotificacao('⚠️ Você está offline. Carregando dados locais.', 'warning');
-    }
-  }
-
-  // Funções locais originais (renomeadas)
   function salvarDadosLocal() {
     try {
       const dadosParaSalvar = {
@@ -3442,14 +3404,41 @@
         dataUltimaSalvamento: new Date().toISOString(),
         versaoSistema: '1.0'
       };
-      
       localStorage.setItem('sistemaFinanceiro_dados', JSON.stringify(dadosParaSalvar));
       localStorage.setItem('sistemaFinanceiro_ultimoSalvamento', new Date().toLocaleString('pt-BR'));
-      
       atualizarStatusSalvamento();
     } catch (error) {
       console.error('Erro ao salvar dados localmente:', error);
     }
+  }
+
+  function carregarDados() {
+    database.ref('sistemaFinanceiro').once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          dados = {
+            receitas: data.receitas || [],
+            despesas: data.despesas || [],
+            cirurgias: data.cirurgias || [],
+            funcionarios: data.funcionarios || [],
+            gastosFixos: data.gastosFixos || [],
+            parcelas: data.parcelas || [],
+            insumos: data.insumos || [],
+            saldoAtual: data.saldoAtual || 0
+          };
+          mostrarNotificacao('📂 Dados carregados da nuvem com sucesso!', 'success');
+          atualizarTodasAsVisualizacoes();
+        } else {
+          mostrarNotificacao('⚠️ Nenhum dado encontrado na nuvem. Carregando localmente...', 'warning');
+          carregarDadosLocal();
+        }
+      })
+      .catch((error) => {
+        console.error('Erro ao carregar do Firebase:', error);
+        mostrarNotificacao('❌ Erro ao carregar da nuvem! Carregando localmente...', 'error');
+        carregarDadosLocal();
+      });
   }
 
   function carregarDadosLocal() {
@@ -3457,7 +3446,6 @@
       const dadosSalvos = localStorage.getItem('sistemaFinanceiro_dados');
       if (dadosSalvos) {
         const dadosCarregados = JSON.parse(dadosSalvos);
-        
         dados = {
           receitas: dadosCarregados.receitas || [],
           despesas: dadosCarregados.despesas || [],
@@ -3468,7 +3456,6 @@
           insumos: dadosCarregados.insumos || [],
           saldoAtual: dadosCarregados.saldoAtual || 0
         };
-        
         return true;
       }
     } catch (error) {
@@ -3476,5 +3463,6 @@
     }
     return false;
   }
+</script>
 
 
