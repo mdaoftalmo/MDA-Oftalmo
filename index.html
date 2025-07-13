@@ -1498,13 +1498,30 @@
         let usuarioLogado = false;
 
         // === FUNÇÕES DE SALVAMENTO ===
-        function salvarDados() {
-            try {
-                const dadosParaSalvar = {
-                    ...dados,
-                    dataUltimaSalvamento: new Date().toISOString(),
-                    versaoSistema: '1.0'
-                };
+        
+function salvarDados() {
+    try {
+        const dadosParaSalvar = {
+            ...dados,
+            dataUltimaSalvamento: new Date().toISOString(),
+            versaoSistema: '1.0'
+        };
+
+        firebase.database().ref('dados/').set(dadosParaSalvar)
+            .then(() => {
+                mostrarNotificacao('💾 Dados salvos no Firebase com sucesso!', 'success');
+                atualizarStatusSalvamento();
+            })
+            .catch((error) => {
+                console.error('Erro ao salvar no Firebase:', error);
+                mostrarNotificacao('❌ Erro ao salvar no Firebase!', 'error');
+            });
+    } catch (error) {
+        console.error('Erro geral ao salvar dados:', error);
+        mostrarNotificacao('❌ Erro geral ao salvar dados!', 'error');
+    }
+}
+;
                 
                 localStorage.setItem('sistemaFinanceiro_dados', JSON.stringify(dadosParaSalvar));
                 localStorage.setItem('sistemaFinanceiro_ultimoSalvamento', new Date().toLocaleString('pt-BR'));
@@ -1517,23 +1534,35 @@
             }
         }
 
-        function carregarDados() {
-            try {
-                const dadosSalvos = localStorage.getItem('sistemaFinanceiro_dados');
-                if (dadosSalvos) {
-                    const dadosCarregados = JSON.parse(dadosSalvos);
-                    
-                    // Manter compatibilidade com versões antigas
-                    dados = {
-                        receitas: dadosCarregados.receitas || [],
-                        despesas: dadosCarregados.despesas || [],
-                        cirurgias: dadosCarregados.cirurgias || [],
-                        funcionarios: dadosCarregados.funcionarios || [],
-                        gastosFixos: dadosCarregados.gastosFixos || [],
-                        parcelas: dadosCarregados.parcelas || [],
-                        insumos: dadosCarregados.insumos || [],
-                        saldoAtual: dadosCarregados.saldoAtual || 0
-                    };
+        
+function carregarDados() {
+    return firebase.database().ref("dados/").once("value").then(snapshot => {
+        const dadosCarregados = snapshot.val();
+        if (dadosCarregados) {
+            dados = {
+                receitas: dadosCarregados.receitas || [],
+                despesas: dadosCarregados.despesas || [],
+                cirurgias: dadosCarregados.cirurgias || [],
+                funcionarios: dadosCarregados.funcionarios || [],
+                gastosFixos: dadosCarregados.gastosFixos || [],
+                parcelas: dadosCarregados.parcelas || [],
+                insumos: dadosCarregados.insumos || [],
+                saldoAtual: dadosCarregados.saldoAtual || 0
+            };
+            mostrarNotificacao('📂 Dados carregados do Firebase com sucesso!', 'success');
+            atualizarStatusSalvamento();
+            return true;
+        } else {
+            mostrarNotificacao('⚠️ Nenhum dado encontrado no Firebase.', 'warning');
+            return false;
+        }
+    }).catch(error => {
+        console.error('Erro ao carregar do Firebase:', error);
+        mostrarNotificacao('❌ Erro ao carregar dados do Firebase!', 'error');
+        return false;
+    });
+}
+;
                     
                     mostrarNotificacao('📂 Dados carregados com sucesso!', 'success');
                     atualizarStatusSalvamento();
@@ -1894,7 +1923,17 @@
             return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
         }
 
-        function atualizarDashboard() {
+        
+function atualizarSaldoVisual() {
+    atualizarSaldoVisual(); // saldo atualizado
+    document.getElementById('displaySaldo').textContent = formatarMoeda(dados.saldoAtual);
+
+    const saldoProjetado = dados.saldoAtual - 43183.01; // Valor fixo dos gastos
+    document.getElementById('saldoProjetado').innerHTML = `<strong>${formatarMoeda(saldoProjetado)}</strong>`;
+}
+
+
+function atualizarDashboard() {
             if (!usuarioLogado) return;
             
             var mesAtual = new Date().toISOString().slice(0, 7);
@@ -1923,7 +1962,7 @@
             
             var resultado = totalReceitas - totalDespesas;
             
-            document.getElementById('saldoAtual').textContent = formatarMoeda(dados.saldoAtual);
+            atualizarSaldoVisual(); // saldo atualizado
             document.getElementById('totalReceitas').textContent = formatarMoeda(totalReceitas);
             document.getElementById('totalDespesas').textContent = formatarMoeda(totalDespesas);
             document.getElementById('resultado').textContent = formatarMoeda(resultado);
@@ -3371,13 +3410,30 @@
   const database = firebase.database();
 
   // Sobrescreve a funcao salvarDados para incluir Firebase
-  function salvarDados() {
+  
+function salvarDados() {
     try {
-      const dadosParaSalvar = {
-        ...dados,
-        dataUltimaSalvamento: new Date().toISOString(),
-        versaoSistema: '1.0'
-      };
+        const dadosParaSalvar = {
+            ...dados,
+            dataUltimaSalvamento: new Date().toISOString(),
+            versaoSistema: '1.0'
+        };
+
+        firebase.database().ref('dados/').set(dadosParaSalvar)
+            .then(() => {
+                mostrarNotificacao('💾 Dados salvos no Firebase com sucesso!', 'success');
+                atualizarStatusSalvamento();
+            })
+            .catch((error) => {
+                console.error('Erro ao salvar no Firebase:', error);
+                mostrarNotificacao('❌ Erro ao salvar no Firebase!', 'error');
+            });
+    } catch (error) {
+        console.error('Erro geral ao salvar dados:', error);
+        mostrarNotificacao('❌ Erro geral ao salvar dados!', 'error');
+    }
+}
+;
 
       // Tenta salvar na nuvem
       database.ref('sistemaFinanceiro').set(dadosParaSalvar)
@@ -3412,21 +3468,35 @@
     }
   }
 
-  function carregarDados() {
-    database.ref('sistemaFinanceiro').once('value')
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          dados = {
-            receitas: data.receitas || [],
-            despesas: data.despesas || [],
-            cirurgias: data.cirurgias || [],
-            funcionarios: data.funcionarios || [],
-            gastosFixos: data.gastosFixos || [],
-            parcelas: data.parcelas || [],
-            insumos: data.insumos || [],
-            saldoAtual: data.saldoAtual || 0
-          };
+  
+function carregarDados() {
+    return firebase.database().ref("dados/").once("value").then(snapshot => {
+        const dadosCarregados = snapshot.val();
+        if (dadosCarregados) {
+            dados = {
+                receitas: dadosCarregados.receitas || [],
+                despesas: dadosCarregados.despesas || [],
+                cirurgias: dadosCarregados.cirurgias || [],
+                funcionarios: dadosCarregados.funcionarios || [],
+                gastosFixos: dadosCarregados.gastosFixos || [],
+                parcelas: dadosCarregados.parcelas || [],
+                insumos: dadosCarregados.insumos || [],
+                saldoAtual: dadosCarregados.saldoAtual || 0
+            };
+            mostrarNotificacao('📂 Dados carregados do Firebase com sucesso!', 'success');
+            atualizarStatusSalvamento();
+            return true;
+        } else {
+            mostrarNotificacao('⚠️ Nenhum dado encontrado no Firebase.', 'warning');
+            return false;
+        }
+    }).catch(error => {
+        console.error('Erro ao carregar do Firebase:', error);
+        mostrarNotificacao('❌ Erro ao carregar dados do Firebase!', 'error');
+        return false;
+    });
+}
+;
           mostrarNotificacao('📂 Dados carregados da nuvem com sucesso!', 'success');
           atualizarTodasAsVisualizacoes();
         } else {
