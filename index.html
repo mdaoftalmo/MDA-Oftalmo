@@ -1521,17 +1521,7 @@ function salvarDados() {
         mostrarNotificacao('❌ Erro geral ao salvar dados!', 'error');
     }
 }
-;
-                
-                localStorage.setItem('sistemaFinanceiro_dados', JSON.stringify(dadosParaSalvar));
-                localStorage.setItem('sistemaFinanceiro_ultimoSalvamento', new Date().toLocaleString('pt-BR'));
-                
-                mostrarNotificacao('💾 Dados salvos com sucesso!', 'success');
-                atualizarStatusSalvamento();
-            } catch (error) {
-                console.error('Erro ao salvar dados:', error);
-                mostrarNotificacao('❌ Erro ao salvar dados!', 'error');
-            }
+
         }
 
         
@@ -1774,6 +1764,13 @@ function carregarDados() {
                 mostrarErro('Por favor, preencha todos os campos!');
                 return;
             }
+
+
+// Adiciona o evento de submit no formulário de login
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // impede recarregamento da página
+    realizarLogin();    // chama a função
+});
 
             mostrarLoading(true);
 
