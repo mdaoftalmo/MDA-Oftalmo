@@ -1894,6 +1894,15 @@
             return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
         }
 
+function atualizarSaldoVisual() {
+    atualizarSaldoVisual(); // saldo atualizado em todos os lugares
+    document.getElementById('displaySaldo').textContent = formatarMoeda(dados.saldoAtual);
+
+    const saldoProjetado = dados.saldoAtual - 43183.01; // Valor fixo dos gastos
+    document.getElementById('saldoProjetado').innerHTML = `<strong>${formatarMoeda(saldoProjetado)}</strong>`;
+}
+
+
         function atualizarDashboard() {
             if (!usuarioLogado) return;
             
@@ -1923,7 +1932,7 @@
             
             var resultado = totalReceitas - totalDespesas;
             
-            document.getElementById('saldoAtual').textContent = formatarMoeda(dados.saldoAtual);
+            atualizarSaldoVisual(); // saldo atualizado em todos os lugares
             document.getElementById('totalReceitas').textContent = formatarMoeda(totalReceitas);
             document.getElementById('totalDespesas').textContent = formatarMoeda(totalDespesas);
             document.getElementById('resultado').textContent = formatarMoeda(resultado);
