@@ -658,7 +658,6 @@
     </style>
 </head>
 <body>
-    <!-- TELA DE LOGIN -->
     <div id="telaLogin" class="visible">
         <div class="login-container">
             <div class="login-left">
@@ -744,7 +743,6 @@
         </div>
     </div>
 
-    <!-- SISTEMA FINANCEIRO -->
     <div id="telaSistema" class="hidden">
         <div class="sistema-container">
             <div class="header">
@@ -784,7 +782,6 @@
                 <div class="tab" onclick="abrirAba('relatorios')">Relatorios</div>
             </div>
 
-            <!-- Dashboard -->
             <div id="dashboard" class="tab-content active">
                 <div class="summary-cards">
                     <div class="summary-card">
@@ -826,7 +823,6 @@
                 </div>
             </div>
 
-            <!-- Receitas -->
             <div id="receitas" class="tab-content">
                 <div class="card">
                     <h3>Registrar Receita</h3>
@@ -871,7 +867,6 @@
                 </div>
             </div>
 
-            <!-- Despesas -->
             <div id="despesas" class="tab-content">
                 <div class="card">
                     <h3>Registrar Despesa</h3>
@@ -915,12 +910,11 @@
                 </div>
             </div>
 
-            <!-- Financeiro -->
             <div id="financeiro" class="tab-content">
                 <div class="card">
                     <h3>Controle de Saldo</h3>
                     <div class="form-group">
-                        <label>Saldo Atual da Conta (R$)</label>
+                        <label>Saldo Atual da Conta (R$) - Calculado Automaticamente</label>
                         <input type="number" step="0.01" id="inputSaldo" placeholder="0,00">
                     </div>
                     <button type="button" class="btn" onclick="atualizarSaldo()">Atualizar Saldo</button>
@@ -944,7 +938,6 @@
                 </div>
             </div>
 
-            <!-- Cirurgias -->
             <div id="cirurgias" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -997,7 +990,6 @@
                                 </select>
                             </div>
 
-                            <!-- Seção de Custos Operacionais -->
                             <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 15px 0;">
                                 <h4>Custos Operacionais</h4>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
@@ -1031,7 +1023,6 @@
                                 </div>
                             </div>
 
-                            <!-- Seção de Insumos -->
                             <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 15px 0;">
                                 <h4>Insumos Utilizados</h4>
                                 <div id="insumosUtilizados">
@@ -1054,7 +1045,6 @@
                                 </div>
                             </div>
 
-                            <!-- Resumo Financeiro -->
                             <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 15px 0; background: #f8f9fa;">
                                 <h4>Resumo Financeiro Completo</h4>
                                 <div class="valor-detalhado">
@@ -1151,7 +1141,6 @@
                 </div>
             </div>
 
-            <!-- Funcionários -->
             <div id="funcionarios" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -1236,7 +1225,6 @@
                 </div>
             </div>
 
-            <!-- Gastos Fixos -->
             <div id="gastosFixos" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -1295,7 +1283,6 @@
                 </div>
             </div>
 
-            <!-- Parcelas -->
             <div id="parcelas" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -1360,7 +1347,6 @@
                 </div>
             </div>
 
-            <!-- Insumos -->
             <div id="insumos" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -1434,7 +1420,6 @@
                 </div>
             </div>
 
-            <!-- Relatórios -->
             <div id="relatorios" class="tab-content">
                 <div class="grid">
                     <div class="card">
@@ -1492,7 +1477,7 @@
             gastosFixos: [],
             parcelas: [],
             insumos: [],
-            saldoAtual: 0
+            saldoAtual: 0 // Este valor não é mais a fonte da verdade, mas é mantido por compatibilidade.
         };
 
         let usuarioLogado = false;
@@ -1532,7 +1517,7 @@
                         gastosFixos: dadosCarregados.gastosFixos || [],
                         parcelas: dadosCarregados.parcelas || [],
                         insumos: dadosCarregados.insumos || [],
-                        saldoAtual: dadosCarregados.saldoAtual || 0
+                        saldoAtual: dadosCarregados.saldoAtual || 0 // Carrega o saldo antigo, mas será recalculado
                     };
                     
                     mostrarNotificacao('📂 Dados carregados com sucesso!', 'success');
@@ -1794,7 +1779,7 @@
             // Carregar dados salvos
             carregarDados();
             
-            atualizarDashboard();
+            atualizarTodasAsVisualizacoes();
             atualizarStatusSalvamento();
         }
 
@@ -1923,7 +1908,7 @@
             
             var resultado = totalReceitas - totalDespesas;
             
-            document.getElementById('saldoAtual').textContent = formatarMoeda(dados.saldoAtual);
+            document.getElementById('saldoAtual').textContent = formatarMoeda(calcularSaldoAtualGlobal());
             document.getElementById('totalReceitas').textContent = formatarMoeda(totalReceitas);
             document.getElementById('totalDespesas').textContent = formatarMoeda(totalDespesas);
             document.getElementById('resultado').textContent = formatarMoeda(resultado);
@@ -2020,27 +2005,45 @@
                 container.innerHTML = html;
             }
         }
+        
+        // NOVA FUNÇÃO: Calcula o saldo total com base em TODAS as receitas e despesas
+        function calcularSaldoAtualGlobal() {
+            const totalReceitas = dados.receitas.reduce((acc, receita) => acc + parseFloat(receita.valor), 0);
+            const totalDespesas = dados.despesas.reduce((acc, despesa) => acc + parseFloat(despesa.valor), 0);
+            return totalReceitas - totalDespesas;
+        }
 
         function atualizarFinanceiro() {
             if (!usuarioLogado) return;
             
-            document.getElementById('inputSaldo').value = dados.saldoAtual;
-            document.getElementById('displaySaldo').textContent = formatarMoeda(dados.saldoAtual);
-            var saldoProjetado = dados.saldoAtual - 43183.01;
+            // Calcula o saldo atual dinamicamente
+            const saldoCalculado = calcularSaldoAtualGlobal();
+            
+            // Atualiza a interface da aba "Financeiro"
+            document.getElementById('inputSaldo').value = saldoCalculado.toFixed(2);
+            document.getElementById('displaySaldo').textContent = formatarMoeda(saldoCalculado);
+            
+            // O campo de input agora é apenas para visualização
+            document.getElementById('inputSaldo').readOnly = true; 
+            document.getElementById('inputSaldo').style.background = '#e9ecef';
+
+            // A projeção continua funcionando
+            const totalGastosFixos = dados.gastosFixos.reduce((total, g) => total + parseFloat(g.valor), 0);
+            var saldoProjetado = saldoCalculado - totalGastosFixos;
             document.getElementById('saldoProjetado').innerHTML = '<strong>' + formatarMoeda(saldoProjetado) + '</strong>';
+
+            // Desabilita o botão que não é mais necessário
+            const btnAtualizar = document.querySelector('#financeiro .btn');
+            if(btnAtualizar) {
+                btnAtualizar.textContent = 'Saldo Automático';
+                btnAtualizar.disabled = true;
+            }
         }
 
         function atualizarSaldo() {
-            if (!usuarioLogado) return;
-            
-            var novoSaldo = parseFloat(document.getElementById('inputSaldo').value) || 0;
-            dados.saldoAtual = novoSaldo;
-            atualizarFinanceiro();
-            atualizarDashboard();
-            
-            // Salvamento automático
-            salvarAutomatico();
-            mostrarNotificacao('💰 Saldo atualizado com sucesso!', 'success');
+            // Esta função agora está obsoleta, mas é mantida para não quebrar o botão onclick.
+            // A lógica real está em `atualizarFinanceiro`.
+            mostrarNotificacao('ℹ️ O saldo é atualizado automaticamente.', 'info');
         }
 
         function adicionarDadosExemplo() {
@@ -2207,6 +2210,23 @@
                         { id: 7002, nome: 'Lubrificante Ocular', quantidade: 1, preco: 0.80, unidade: 'frasco', total: 0.80 }
                     ]
                 });
+                
+                // Adicionar receitas para as cirurgias realizadas de exemplo
+                dados.receitas.push({
+                    id: 300101,
+                    fonte: 'cirurgias',
+                    descricao: 'Líquido da Cirurgia: Maria Santos (catarata)',
+                    valor: 2199.60,
+                    data: '2024-06-15'
+                });
+                 dados.receitas.push({
+                    id: 300301,
+                    fonte: 'cirurgias',
+                    descricao: 'Líquido da Cirurgia: Ana Costa (pterígio)',
+                    valor: 803.60,
+                    data: '2024-06-20'
+                });
+
 
                 // Funcionários (ANTES das cirurgias para calcular custos)
                 dados.funcionarios.push({
@@ -2296,12 +2316,8 @@
                 dados.insumos[0].quantidade -= 2; // Seringa: 46 - 2 = 44
                 dados.insumos[2].quantidade -= 2; // Gaze: 29 - 2 = 27
                 
-                dados.saldoAtual = 15000;
-                
                 // Atualizar todas as visualizações
-                atualizarDashboard();
-                atualizarListaReceitas();
-                atualizarListaDespesas();
+                atualizarTodasAsVisualizacoes();
                 
                 // Salvamento automático
                 salvarAutomatico();
@@ -2632,7 +2648,7 @@
 
         function excluirCirurgia(id) {
             if (!usuarioLogado) return;
-            if (confirm('Tem certeza que deseja excluir esta cirurgia?')) {
+            if (confirm('Tem certeza que deseja excluir esta cirurgia? Esta ação também removerá a receita associada a ela, se houver.')) {
                 // Restaurar estoque se necessário
                 var cirurgia = dados.cirurgias.find(c => c.id === id);
                 if (cirurgia && cirurgia.status === 'realizada' && cirurgia.insumosUtilizados) {
@@ -2644,16 +2660,18 @@
                     });
                 }
                 
+                // Excluir a receita correspondente
+                const descReceita = `Líquido da Cirurgia: ${cirurgia.paciente} (${cirurgia.tipo})`;
+                dados.receitas = dados.receitas.filter(r => r.descricao !== descReceita);
+
+                // Excluir a cirurgia
                 dados.cirurgias = dados.cirurgias.filter(c => c.id !== id);
-                atualizarListaCirurgias();
-                atualizarResumoCirurgias();
-                atualizarListaInsumos();
-                atualizarResumoInsumos();
-                atualizarDashboard();
+
+                atualizarTodasAsVisualizacoes();
                 
                 // Salvamento automático
                 salvarAutomatico();
-                mostrarNotificacao('🗑️ Cirurgia excluída com sucesso!', 'warning');
+                mostrarNotificacao('🗑️ Cirurgia e sua receita foram excluídas!', 'warning');
             }
         }
 
@@ -2886,19 +2904,24 @@
             // Filtrar dados por período
             var receitasPeriodo = dados.receitas.filter(r => r.data >= formatoData && r.data <= formatoDataFinal);
             var despesasPeriodo = dados.despesas.filter(d => d.data >= formatoData && d.data <= formatoDataFinal);
-            var cirurgiasPeriodo = dados.cirurgias.filter(c => c.data >= formatoData && c.data <= formatoDataFinal);
+            var cirurgiasPeriodo = dados.cirurgias.filter(c => c.data >= formatoData && c.data <= formatoDataFinal && c.status === 'realizada');
             
             var totalReceitas = receitasPeriodo.reduce((total, r) => total + parseFloat(r.valor), 0);
             var totalDespesas = despesasPeriodo.reduce((total, d) => total + parseFloat(d.valor), 0);
-            var totalCirurgias = cirurgiasPeriodo.filter(c => c.status === 'realizada').reduce((total, c) => total + parseFloat(c.valor), 0);
+            var faturamentoBrutoCirurgias = cirurgiasPeriodo.reduce((total, c) => total + parseFloat(c.valorBruto), 0);
+            var faturamentoLiquidoCirurgias = cirurgiasPeriodo.reduce((total, c) => total + parseFloat(c.valorLiquido), 0);
             var resultado = totalReceitas - totalDespesas;
             
             var html = '<h4>Relatório Financeiro - ' + formatarData(formatoData) + ' a ' + formatarData(formatoDataFinal) + '</h4>';
-            html += '<div class="valor-detalhado"><span><strong>Total de Receitas:</strong></span><span><strong>' + formatarMoeda(totalReceitas) + '</strong></span></div>';
-            html += '<div class="valor-detalhado"><span><strong>Total de Despesas:</strong></span><span><strong>' + formatarMoeda(totalDespesas) + '</strong></span></div>';
-            html += '<div class="valor-detalhado"><span><strong>Faturamento Cirurgias:</strong></span><span><strong>' + formatarMoeda(totalCirurgias) + '</strong></span></div>';
+            html += '<div class="valor-detalhado"><span><strong>Total de Receitas (Geral):</strong></span><span><strong>' + formatarMoeda(totalReceitas) + '</strong></span></div>';
+            html += '<div class="valor-detalhado"><span><strong>Total de Despesas (Geral):</strong></span><span><strong>' + formatarMoeda(totalDespesas) + '</strong></span></div>';
             html += '<hr>';
-            html += '<div class="valor-detalhado"><span><strong>Resultado Líquido:</strong></span><span style="color: ' + (resultado >= 0 ? '#28a745' : '#dc3545') + ';"><strong>' + formatarMoeda(resultado) + '</strong></span></div>';
+            html += '<div class="valor-detalhado"><span><strong>Resultado Líquido (Receitas - Despesas):</strong></span><span style="color: ' + (resultado >= 0 ? '#28a745' : '#dc3545') + ';"><strong>' + formatarMoeda(resultado) + '</strong></span></div>';
+            
+            html += '<h5 style="margin-top: 20px;">Resumo de Cirurgias no Período</h5>';
+            html += '<div class="valor-detalhado"><span>Nº de Cirurgias Realizadas:</span><span>' + cirurgiasPeriodo.length + '</span></div>';
+            html += '<div class="valor-detalhado"><span>Faturamento Bruto (Cirurgias):</span><span>' + formatarMoeda(faturamentoBrutoCirurgias) + '</span></div>';
+            html += '<div class="valor-detalhado"><span>Faturamento Líquido (Cirurgias):</span><span>' + formatarMoeda(faturamentoLiquidoCirurgias) + '</span></div>';
             
             html += '<h5 style="margin-top: 20px;">Resumo por Categoria:</h5>';
             
@@ -2974,12 +2997,17 @@
         function excluirReceita(id) {
             if (!usuarioLogado) return;
             
+            const receita = dados.receitas.find(r => r.id === id);
+            if (receita && receita.descricao.includes('Líquido da Cirurgia')) {
+                alert('Esta receita foi gerada por uma cirurgia. Para removê-la, por favor, exclua a cirurgia correspondente na aba "Cirurgias".');
+                return;
+            }
+
             if (confirm('Tem certeza que deseja excluir esta receita?')) {
                 dados.receitas = dados.receitas.filter(function(receita) {
                     return receita.id !== id;
                 });
-                atualizarListaReceitas();
-                atualizarDashboard();
+                atualizarTodasAsVisualizacoes();
                 
                 // Salvamento automático
                 salvarAutomatico();
@@ -2994,8 +3022,7 @@
                 dados.despesas = dados.despesas.filter(function(despesa) {
                     return despesa.id !== id;
                 });
-                atualizarListaDespesas();
-                atualizarDashboard();
+                atualizarTodasAsVisualizacoes();
                 
                 // Salvamento automático
                 salvarAutomatico();
@@ -3028,8 +3055,7 @@
             
             e.target.reset();
             e.target.querySelector('input[type="date"]').value = new Date().toISOString().slice(0, 10);
-            atualizarListaReceitas();
-            atualizarDashboard();
+            atualizarTodasAsVisualizacoes();
             
             // Salvamento automático
             salvarAutomatico();
@@ -3055,8 +3081,7 @@
             
             e.target.reset();
             e.target.querySelector('input[type="date"]').value = new Date().toISOString().slice(0, 10);
-            atualizarListaDespesas();
-            atualizarDashboard();
+            atualizarTodasAsVisualizacoes();
             
             // Salvamento automático
             salvarAutomatico();
@@ -3088,6 +3113,22 @@
             // Processar cirurgia com cálculos automáticos
             var cirurgia = processarCirurgia(dadosBasicos);
             dados.cirurgias.push(cirurgia);
+
+            // ================================================================
+            // === NOVO CÓDIGO ADICIONADO AQUI ===
+            // Se a cirurgia foi realizada, adiciona o valor líquido como receita
+            if (cirurgia.status === 'realizada' && cirurgia.valorLiquido > 0) {
+                const receitaCirurgia = {
+                    id: Date.now() + 1, // id ligeiramente diferente para evitar colisão
+                    fonte: 'cirurgias',
+                    descricao: `Líquido da Cirurgia: ${cirurgia.paciente} (${cirurgia.tipo})`,
+                    valor: cirurgia.valorLiquido,
+                    data: cirurgia.data
+                };
+                dados.receitas.push(receitaCirurgia);
+                mostrarNotificacao('✅ Receita da cirurgia lançada automaticamente!', 'success');
+            }
+            // ================================================================
             
             e.target.reset();
             e.target.querySelector('input[type="date"]').value = new Date().toISOString().slice(0, 10);
@@ -3115,11 +3156,7 @@
             // Resetar cálculos
             calcularResumoFinanceiro();
             
-            atualizarListaCirurgias();
-            atualizarResumoCirurgias();
-            atualizarListaInsumos();
-            atualizarResumoInsumos();
-            atualizarDashboard();
+            atualizarTodasAsVisualizacoes();
             
             // Salvamento automático
             salvarAutomatico();
@@ -3350,7 +3387,6 @@
         }
     </script>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -3465,4 +3501,4 @@
   }
 </script>
 
-
+</html>
