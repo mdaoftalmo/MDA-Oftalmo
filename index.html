@@ -1305,6 +1305,10 @@
                                 <input type="number" step="0.01" name="valor" placeholder="0,00" required>
                             </div>
                             <div class="form-group">
+                                <label>Número de Parcelas</label>
+                                <input type="number" name="numeroParcelas" placeholder="Ex: 12" min="1" required>
+                            </div>
+                            <div class="form-group">
                                 <label>Data de Vencimento</label>
                                 <input type="date" name="dataVencimento" required>
                             </div>
@@ -1330,6 +1334,10 @@
                             <div class="summary-card">
                                 <h4>A Receber</h4>
                                 <div class="value" id="totalAReceber">R$ 0,00</div>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Total de Parcelas</h4>
+                                <div class="value" id="totalParcelasRegistradas">0</div>
                             </div>
                         </div>
                     </div>
@@ -2292,6 +2300,7 @@
                     tipo: 'pagar',
                     descricao: 'Financiamento Equipamento',
                     valor: 1200,
+                    numeroParcelas: 12, // Exemplo
                     dataVencimento: '2024-06-30',
                     status: 'pendente'
                 });
@@ -2301,6 +2310,7 @@
                     tipo: 'receber',
                     descricao: 'Plano de Saúde - Consultas',
                     valor: 2500,
+                    numeroParcelas: 3, // Exemplo
                     dataVencimento: '2024-06-28',
                     status: 'pendente'
                 });
@@ -2783,7 +2793,12 @@
                     html += '<div class="transaction-item">';
                     html += '<div class="transaction-info">';
                     html += '<div><strong>' + parcela.descricao + '</strong></div>';
-                    html += '<div class="transaction-date">Vencimento: ' + formatarData(parcela.dataVencimento) + ' | ' + parcela.tipo.toUpperCase() + '</div>';
+                    html += '<div class="transaction-date">Vencimento: ' + formatarData(parcela.dataVencimento) + ' | ' + parcela.tipo.toUpperCase();
+                    // Adicionar número de parcelas se existir
+                    if (parcela.numeroParcelas) {
+                        html += ' | Parcelas: ' + parcela.numeroParcelas;
+                    }
+                    html += '</div>';
                     html += '<div style="margin-top: 5px;"><span class="' + statusClass + '">' + parcela.status.toUpperCase() + '</span></div>';
                     html += '</div>';
                     html += '<div class="transaction-value ' + tipoClass + '">' + formatarMoeda(parcela.valor) + '</div>';
@@ -2797,9 +2812,11 @@
         function atualizarResumoParcelas() {
             var totalAPagar = dados.parcelas.filter(p => p.tipo === 'pagar' && p.status === 'pendente').reduce((total, p) => total + parseFloat(p.valor), 0);
             var totalAReceber = dados.parcelas.filter(p => p.tipo === 'receber' && p.status === 'pendente').reduce((total, p) => total + parseFloat(p.valor), 0);
+            var totalParcelasRegistradas = dados.parcelas.length; // Novo: Contagem total de parcelas
             
             document.getElementById('totalAPagar').textContent = formatarMoeda(totalAPagar);
             document.getElementById('totalAReceber').textContent = formatarMoeda(totalAReceber);
+            document.getElementById('totalParcelasRegistradas').textContent = totalParcelasRegistradas; // Atualiza o novo elemento
         }
 
         function excluirParcela(id) {
@@ -3244,6 +3261,7 @@
                 tipo: formData.get('tipo'),
                 descricao: formData.get('descricao'),
                 valor: parseFloat(formData.get('valor')),
+                numeroParcelas: parseInt(formData.get('numeroParcelas')), // Captura o novo campo
                 dataVencimento: formData.get('dataVencimento'),
                 status: formData.get('status')
             };
