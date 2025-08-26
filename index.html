@@ -2854,7 +2854,9 @@ function atualizarListaInsumos() {
 
     if (dados.insumos.length === 0) {
         lista.innerHTML = '<div class="transaction-item"><div class="transaction-info">Nenhum insumo registrado ainda</div></div>';
-        document.getElementById('valorTotalInsumos').textContent = 'R$ 0,00';
+        if (document.getElementById('valorTotalInsumos')) {
+            document.getElementById('valorTotalInsumos').textContent = 'R$ 0,00';
+        }
         return;
     }
 
@@ -2877,7 +2879,9 @@ function atualizarListaInsumos() {
     });
 
     // Atualiza o total no final
-    document.getElementById('valorTotalInsumos').textContent = formatarMoeda(total);
+    if (document.getElementById('valorTotalInsumos')) {
+        document.getElementById('valorTotalInsumos').textContent = formatarMoeda(total);
+    }
 }
  else {
                 var html = '';
