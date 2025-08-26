@@ -1417,26 +1417,13 @@
                     </div>
                 </div>
 
-                
-<div class="card">
-    <h3>Lista de Insumos</h3>
-    <div class="transactions-list" id="listaInsumos">
-        <div class="transaction-item">
-            <div class="transaction-info">
-                <div>Nenhum insumo registrado ainda</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total dos insumos -->
-    <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-        <div class="valor-detalhado">
-            <span><strong>Valor Total dos Insumos:</strong></span>
-            <span id="valorTotalInsumos"><strong>R$ 0,00</strong></span>
-        </div>
-    </div>
-</div>
-
+                <div class="card">
+                    <h3>Lista de Insumos</h3>
+                    <div class="transactions-list" id="listaInsumos">
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div>Nenhum insumo registrado ainda</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2847,43 +2834,11 @@
         }
 
         // === FUNÇÕES PARA INSUMOS ===
-        
-function atualizarListaInsumos() {
-    const lista = document.getElementById('listaInsumos');
-    lista.innerHTML = '';
-
-    if (dados.insumos.length === 0) {
-        lista.innerHTML = '<div class="transaction-item"><div class="transaction-info">Nenhum insumo registrado ainda</div></div>';
-        if (document.getElementById('valorTotalInsumos')) {
-            document.getElementById('valorTotalInsumos').textContent = 'R$ 0,00';
-        }
-        return;
-    }
-
-    let total = 0;
-
-    dados.insumos.forEach((insumo, index) => {
-        const valorInsumo = insumo.quantidade * insumo.preco;
-        total += valorInsumo;
-
-        const item = document.createElement('div');
-        item.className = 'transaction-item';
-        item.innerHTML = `
-            <div class="transaction-info">
-                <div><strong>${insumo.nome}</strong> (${insumo.categoria})</div>
-                <div>Qtd: ${insumo.quantidade} ${insumo.unidade} | Preço: ${formatarMoeda(insumo.preco)}</div>
-            </div>
-            <div class="transaction-value despesa">${formatarMoeda(valorInsumo)}</div>
-        `;
-        lista.appendChild(item);
-    });
-
-    // Atualiza o total no final
-    if (document.getElementById('valorTotalInsumos')) {
-        document.getElementById('valorTotalInsumos').textContent = formatarMoeda(total);
-    }
-}
- else {
+        function atualizarListaInsumos() {
+            var container = document.getElementById('listaInsumos');
+            if (dados.insumos.length === 0) {
+                container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Nenhum insumo registrado ainda</div></div></div>';
+            } else {
                 var html = '';
                 dados.insumos.forEach(function(insumo) {
                     var alertaEstoque = insumo.quantidade <= insumo.estoqueMinimo ? ' ⚠️' : '';
