@@ -1396,6 +1396,10 @@
                             </div>
                             <div class="form-group">
                                 <label>Estoque Mínimo</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Código de Barras</label>
+                                <input type="text" name="codigoBarras" placeholder="Escaneie o código" required>
                                 <input type="number" name="estoqueMinimo" placeholder="Ex: 10" required>
                             </div>
                             <button type="submit" class="btn">Adicionar Insumo</button>
@@ -1415,6 +1419,14 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="card">
+                    <h3>Buscar Produto por Código de Barras</h3>
+                    <div class="form-group">
+                        <input type="text" id="buscarCodigoBarras" placeholder="Escaneie ou digite o código">
+                    </div>
+                    <div id="resultadoBusca"></div>
                 </div>
 
                 <div class="card">
