@@ -1396,11 +1396,12 @@
                             </div>
                             <div class="form-group">
                                 <label>Estoque Mínimo</label>
+                                <input type="number" name="estoqueMinimo" placeholder="Ex: 10" required>
                             </div>
                             <div class="form-group">
                                 <label>Código de Barras</label>
                                 <input type="text" name="codigoBarras" placeholder="Escaneie o código" required>
-                                <input type="number" name="estoqueMinimo" placeholder="Ex: 10" required>
+                            </div>
                             </div>
                             <button type="submit" class="btn">Adicionar Insumo</button>
                         </form>
@@ -3305,7 +3306,8 @@
                 quantidade: parseInt(formData.get('quantidade')),
                 unidade: formData.get('unidade'),
                 preco: parseFloat(formData.get('preco')),
-                estoqueMinimo: parseInt(formData.get('estoqueMinimo'))
+                estoqueMinimo: parseInt(formData.get('estoqueMinimo')),
+                codigoBarras: formData.get('codigoBarras')
             };
 
             dados.insumos.push(insumo);
@@ -3416,10 +3418,118 @@
                 }
             });
         }
-    </script>
+    
+    // === Busca por Código de Barras (escaneamento) ===
+    function buscarInsumoPorCodigo(codigo) {
+        const display = document.getElementById('resultadoBusca');
+        if (!codigo) {
+            display.innerHTML = '';
+            return;
+        }
+        const insumo = dados.insumos.find(item => String(item.codigoBarras || '') === String(codigo));
+        if (insumo) {
+            display.innerHTML = `
+                <p><strong>Produto:</strong> ${insumo.nome}</p>
+                <p><strong>Categoria:</strong> ${insumo.categoria}</p>
+                <p><strong>Quantidade:</strong> ${insumo.quantidade} ${insumo.unidade}</p>
+                <p><strong>Preço Unitário:</strong> ${formatarMoeda(parseFloat(insumo.preco || 0))}</p>
+                <p><strong>Código:</strong> ${insumo.codigoBarras || ''}</p>
+            `;
+        } else {
+            display.innerHTML = "<p style='color:red'>Produto não encontrado</p>";
+        }
+    }
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    (function() {
+        var buscarInput = document.getElementById('buscarCodigoBarras');
+        if (!buscarInput) return;
+        buscarInput.addEventListener('input', function(e) {
+            buscarInsumoPorCodigo(e.target.value.trim());
+        });
+        buscarInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarInsumoPorCodigo(e.target.value.trim());
+            }
+        });
+    })();
+
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    // === Busca por Código de Barras (escaneamento) ===
+    function buscarInsumoPorCodigo(codigo) {
+        const display = document.getElementById('resultadoBusca');
+        if (!codigo) {
+            display.innerHTML = '';
+            return;
+        }
+        const insumo = dados.insumos.find(item => String(item.codigoBarras || '') === String(codigo));
+        if (insumo) {
+            display.innerHTML = `
+                <p><strong>Produto:</strong> ${insumo.nome}</p>
+                <p><strong>Categoria:</strong> ${insumo.categoria}</p>
+                <p><strong>Quantidade:</strong> ${insumo.quantidade} ${insumo.unidade}</p>
+                <p><strong>Preço Unitário:</strong> ${formatarMoeda(parseFloat(insumo.preco || 0))}</p>
+                <p><strong>Código:</strong> ${insumo.codigoBarras || ''}</p>
+            `;
+        } else {
+            display.innerHTML = "<p style='color:red'>Produto não encontrado</p>";
+        }
+    }
+
+    (function() {
+        var buscarInput = document.getElementById('buscarCodigoBarras');
+        if (!buscarInput) return;
+        buscarInput.addEventListener('input', function(e) {
+            buscarInsumoPorCodigo(e.target.value.trim());
+        });
+        buscarInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarInsumoPorCodigo(e.target.value.trim());
+            }
+        });
+    })();
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
+    // === Busca por Código de Barras (escaneamento) ===
+    function buscarInsumoPorCodigo(codigo) {
+        const display = document.getElementById('resultadoBusca');
+        if (!codigo) {
+            display.innerHTML = '';
+            return;
+        }
+        const insumo = dados.insumos.find(item => String(item.codigoBarras || '') === String(codigo));
+        if (insumo) {
+            display.innerHTML = `
+                <p><strong>Produto:</strong> ${insumo.nome}</p>
+                <p><strong>Categoria:</strong> ${insumo.categoria}</p>
+                <p><strong>Quantidade:</strong> ${insumo.quantidade} ${insumo.unidade}</p>
+                <p><strong>Preço Unitário:</strong> ${formatarMoeda(parseFloat(insumo.preco || 0))}</p>
+                <p><strong>Código:</strong> ${insumo.codigoBarras || ''}</p>
+            `;
+        } else {
+            display.innerHTML = "<p style='color:red'>Produto não encontrado</p>";
+        }
+    }
+
+    (function() {
+        var buscarInput = document.getElementById('buscarCodigoBarras');
+        if (!buscarInput) return;
+        buscarInput.addEventListener('input', function(e) {
+            buscarInsumoPorCodigo(e.target.value.trim());
+        });
+        buscarInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarInsumoPorCodigo(e.target.value.trim());
+            }
+        });
+    })();
+
+</script>
 
 <script>
   // Configuracao Firebase
@@ -3530,6 +3640,42 @@
     }
     return false;
   }
+
+    // === Busca por Código de Barras (escaneamento) ===
+    function buscarInsumoPorCodigo(codigo) {
+        const display = document.getElementById('resultadoBusca');
+        if (!codigo) {
+            display.innerHTML = '';
+            return;
+        }
+        const insumo = dados.insumos.find(item => String(item.codigoBarras || '') === String(codigo));
+        if (insumo) {
+            display.innerHTML = `
+                <p><strong>Produto:</strong> ${insumo.nome}</p>
+                <p><strong>Categoria:</strong> ${insumo.categoria}</p>
+                <p><strong>Quantidade:</strong> ${insumo.quantidade} ${insumo.unidade}</p>
+                <p><strong>Preço Unitário:</strong> ${formatarMoeda(parseFloat(insumo.preco || 0))}</p>
+                <p><strong>Código:</strong> ${insumo.codigoBarras || ''}</p>
+            `;
+        } else {
+            display.innerHTML = "<p style='color:red'>Produto não encontrado</p>";
+        }
+    }
+
+    (function() {
+        var buscarInput = document.getElementById('buscarCodigoBarras');
+        if (!buscarInput) return;
+        buscarInput.addEventListener('input', function(e) {
+            buscarInsumoPorCodigo(e.target.value.trim());
+        });
+        buscarInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarInsumoPorCodigo(e.target.value.trim());
+            }
+        });
+    })();
+
 </script>
 
 </html>
