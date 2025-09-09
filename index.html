@@ -1027,13 +1027,14 @@
                                 <h4>Insumos Utilizados</h4>
                                 <div id="insumosUtilizados">
                                     <div class="insumo-item" style="display: flex; gap: 10px; margin: 10px 0; align-items: center;">
-                                        <select class="insumo-select" style="flex: 2;">
-                                            <option value="">Selecione um insumo...</option>
-                                        </select>
-                                        <input type="number" class="quantidade-insumo" placeholder="Qtd" style="width: 80px;" min="1">
-                                        <span class="preco-insumo" style="width: 100px; font-weight: bold;"></span>
-                                        <button type="button" class="btn-remover-insumo" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px;">Remover</button>
-                                    </div>
+    <input type="text" class="codigo-barras-insumo" placeholder="Escaneie o código" style="flex: 2;">
+    <select class="insumo-select" style="flex: 2;">
+        <option value="">Selecione um insumo...</option>
+    </select>
+    <input type="number" class="quantidade-insumo" placeholder="Qtd" style="width: 80px;" min="1">
+    <span class="preco-insumo" style="width: 100px; font-weight: bold;"></span>
+    <button type="button" class="btn-remover-insumo" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px;">Remover</button>
+</div>
                                 </div>
                                 <button type="button" id="adicionarInsumo" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin-top: 10px;">+ Adicionar Insumo</button>
                                 
@@ -2476,6 +2477,7 @@
             novaLinha.style.cssText = 'display: flex; gap: 10px; margin: 10px 0; align-items: center;';
             
             novaLinha.innerHTML = `
+                <input type="text" class="codigo-barras-insumo" placeholder="Escaneie o código" style="flex: 2;">
                 <select class="insumo-select" style="flex: 2;">
                     <option value="">Selecione um insumo...</option>
                 </select>
@@ -2495,7 +2497,40 @@
             var preco = linha.querySelector('.preco-insumo');
             var btnRemover = linha.querySelector('.btn-remover-insumo');
             
-            function atualizarPreco() {
+            
+
+            var codigoInput = linha.querySelector('.codigo-barras-insumo');
+            if (codigoInput) {
+                codigoInput.addEventListener('input', function(e) {
+                    var codigo = e.target.value.trim();
+                    if (codigo.length > 2) {
+                        carregarInsumosNoSelect(); // garante que as opções existam
+                        var match = dados.insumos.find(function(i){ return String(i.codigoBarras || '') === String(codigo); });
+                        if (match) {
+                            select.value = match.id;
+                            quantidade.value = quantidade.value || 1;
+                            // força recalculo do preço
+                            select.dispatchEvent(new Event('change'));
+                        }
+                    }
+                });
+                codigoInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        var codigo = e.target.value.trim();
+                        if (codigo) {
+                            carregarInsumosNoSelect();
+                            var match = dados.insumos.find(function(i){ return String(i.codigoBarras || '') === String(codigo); });
+                            if (match) {
+                                select.value = match.id;
+                                quantidade.value = quantidade.value || 1;
+                                select.dispatchEvent(new Event('change'));
+                            }
+                        }
+                    }
+                });
+            }
+function atualizarPreco() {
                 var option = select.options[select.selectedIndex];
                 var qtd = parseInt(quantidade.value) || 0;
                 var precoUnit = parseFloat(option.dataset.preco) || 0;
