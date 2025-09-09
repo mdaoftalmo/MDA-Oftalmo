@@ -1033,7 +1033,7 @@
     </select>
     <input type="number" class="quantidade-insumo" placeholder="Qtd" style="width: 80px;" min="1">
     <span class="preco-insumo" style="width: 100px; font-weight: bold;"></span>
-    <button type="button" class="btn-remover-insumo" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px;">Remover</button>
+    <button type="button" class="btn-remover-insumo" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; flex-shrink: 0; margin-left: 5px;">Remover</button>
 </div>
                                 </div>
                                 <button type="button" id="adicionarInsumo" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin-top: 10px;">+ Adicionar Insumo</button>
@@ -2483,7 +2483,7 @@
                 </select>
                 <input type="number" class="quantidade-insumo" placeholder="Qtd" style="width: 80px;" min="1">
                 <span class="preco-insumo" style="width: 100px; font-weight: bold;"></span>
-                <button type="button" class="btn-remover-insumo" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px;">Remover</button>
+                <button type="button" class="btn-remover-insumo" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; flex-shrink: 0; margin-left: 5px;">Remover</button>
             `;
             
             container.appendChild(novaLinha);
@@ -2498,18 +2498,17 @@
             var btnRemover = linha.querySelector('.btn-remover-insumo');
             
             
-
+            
             var codigoInput = linha.querySelector('.codigo-barras-insumo');
             if (codigoInput) {
                 codigoInput.addEventListener('input', function(e) {
                     var codigo = e.target.value.trim();
                     if (codigo.length > 2) {
-                        carregarInsumosNoSelect(); // garante que as opções existam
+                        carregarInsumosNoSelect();
                         var match = dados.insumos.find(function(i){ return String(i.codigoBarras || '') === String(codigo); });
                         if (match) {
                             select.value = match.id;
                             quantidade.value = quantidade.value || 1;
-                            // força recalculo do preço
                             select.dispatchEvent(new Event('change'));
                         }
                     }
