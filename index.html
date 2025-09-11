@@ -1496,8 +1496,6 @@
             receitas: [],
             despesas: [],
             cirurgias: [],
-            funcionarios: [],
-            gastosFixos: [],
             parcelas: [],
             insumos: [],
             saldoAtual: 0 // Este valor não é mais a fonte da verdade, mas é mantido por compatibilidade.
@@ -1536,8 +1534,6 @@
                         receitas: dadosCarregados.receitas || [],
                         despesas: dadosCarregados.despesas || [],
                         cirurgias: dadosCarregados.cirurgias || [],
-                        funcionarios: dadosCarregados.funcionarios || [],
-                        gastosFixos: dadosCarregados.gastosFixos || [],
                         parcelas: dadosCarregados.parcelas || [],
                         insumos: dadosCarregados.insumos || [],
                         saldoAtual: dadosCarregados.saldoAtual || 0 // Carrega o saldo antigo, mas será recalculado
@@ -1612,8 +1608,6 @@
                             receitas: backup.receitas || [],
                             despesas: backup.despesas || [],
                             cirurgias: backup.cirurgias || [],
-                            funcionarios: backup.funcionarios || [],
-                            gastosFixos: backup.gastosFixos || [],
                             parcelas: backup.parcelas || [],
                             insumos: backup.insumos || [],
                             saldoAtual: backup.saldoAtual || 0
@@ -1716,10 +1710,6 @@
             atualizarListaDespesas();
             atualizarListaCirurgias();
             atualizarResumoCirurgias();
-            atualizarListaFuncionarios();
-            atualizarResumoFuncionarios();
-            atualizarListaGastosFixos();
-            atualizarResumoGastosFixos();
             atualizarListaParcelas();
             atualizarResumoParcelas();
             atualizarListaInsumos();
@@ -1873,12 +1863,6 @@
                     atualizarListaCirurgias();
                     atualizarResumoCirurgias();
                     carregarInsumosNoSelect();
-                } else if (nomeAba === 'funcionarios') {
-                    atualizarListaFuncionarios();
-                    atualizarResumoFuncionarios();
-                } else if (nomeAba === 'gastosFixos') {
-                    atualizarListaGastosFixos();
-                    atualizarResumoGastosFixos();
                 } else if (nomeAba === 'parcelas') {
                     atualizarListaParcelas();
                     atualizarResumoParcelas();
