@@ -1124,6 +1124,12 @@
                             <div class="summary-card">
                                 <h4>Margem Média</h4>
                                 <div class="value" id="margemMedia">0%</div>
+                                <style>
+                                    #cirurgias .card:last-child{
+                                        max-width: 400px;   /*largura maxima*/
+                                        margin-left: auto;  /*joga para a direita*/
+                                    }
+                                </style>
                             </div>
                         </div>
                     </div>
@@ -2970,8 +2976,9 @@ function atualizarPreco() {
             html += '<div class="valor-detalhado"><span>Nº de Cirurgias Realizadas:</span><span>' + cirurgiasPeriodo.length + '</span></div>';
             html += '<div class="valor-detalhado"><span>Faturamento Bruto (Cirurgias):</span><span>' + formatarMoeda(faturamentoBrutoCirurgias) + '</span></div>';
             html += '<div class="valor-detalhado"><span>Faturamento Líquido (Cirurgias):</span><span>' + formatarMoeda(faturamentoLiquidoCirurgias) + '</span></div>';
-            
+    
             html += '<h5 style="margin-top: 20px;">Resumo por Categoria:</h5>';
+            
             
             // Agrupar receitas por fonte
             var receitasPorFonte = {};
