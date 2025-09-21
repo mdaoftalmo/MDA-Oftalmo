@@ -3478,59 +3478,6 @@ function atualizarPreco() {
         });
     })();
 
-
-// === Funções de Cirurgias com edição ===
-
-// Substituir o onsubmit do formCirurgia para suportar edição
-const formCirurgia = document.getElementById("formCirurgia");
-formCirurgia.onsubmit = function(e) {
-    e.preventDefault();
-
-    const novaCirurgia = {
-        tipo: this.tipo.value,
-        paciente: this.paciente.value,
-        valorBruto: parseFloat(this.valorBruto.value),
-        formaPagamento: this.formaPagamento.value,
-        data: this.data.value,
-        status: this.status.value,
-        observacoes: this.observacoes.value
-    };
-
-    if (this.dataset.editIndex) {
-        // Edição
-        const index = this.dataset.editIndex;
-        dados.cirurgias[index] = novaCirurgia;
-        delete this.dataset.editIndex;
-        this.querySelector("button[type='submit']").textContent = "Registrar Cirurgia";
-    } else {
-        // Novo cadastro
-        dados.cirurgias.push(novaCirurgia);
-    }
-
-    salvarDados();
-    atualizarListaCirurgias();
-    atualizarResumoCirurgias();
-    this.reset();
-};
-
-function editarCirurgia(index) {
-    const cirurgia = dados.cirurgias[index];
-    const form = document.getElementById("formCirurgia");
-    form.tipo.value = cirurgia.tipo;
-    form.paciente.value = cirurgia.paciente;
-    form.valorBruto.value = cirurgia.valorBruto;
-    form.formaPagamento.value = cirurgia.formaPagamento;
-    form.data.value = cirurgia.data;
-    form.status.value = cirurgia.status;
-    form.observacoes.value = cirurgia.observacoes || "";
-
-    // Guardar índice em edição
-    form.dataset.editIndex = index;
-
-    // Mudar botão
-    form.querySelector("button[type='submit']").textContent = "Salvar Alterações";
-}
-
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
@@ -3569,59 +3516,6 @@ function editarCirurgia(index) {
         });
     })();
 
-
-// === Funções de Cirurgias com edição ===
-
-// Substituir o onsubmit do formCirurgia para suportar edição
-const formCirurgia = document.getElementById("formCirurgia");
-formCirurgia.onsubmit = function(e) {
-    e.preventDefault();
-
-    const novaCirurgia = {
-        tipo: this.tipo.value,
-        paciente: this.paciente.value,
-        valorBruto: parseFloat(this.valorBruto.value),
-        formaPagamento: this.formaPagamento.value,
-        data: this.data.value,
-        status: this.status.value,
-        observacoes: this.observacoes.value
-    };
-
-    if (this.dataset.editIndex) {
-        // Edição
-        const index = this.dataset.editIndex;
-        dados.cirurgias[index] = novaCirurgia;
-        delete this.dataset.editIndex;
-        this.querySelector("button[type='submit']").textContent = "Registrar Cirurgia";
-    } else {
-        // Novo cadastro
-        dados.cirurgias.push(novaCirurgia);
-    }
-
-    salvarDados();
-    atualizarListaCirurgias();
-    atualizarResumoCirurgias();
-    this.reset();
-};
-
-function editarCirurgia(index) {
-    const cirurgia = dados.cirurgias[index];
-    const form = document.getElementById("formCirurgia");
-    form.tipo.value = cirurgia.tipo;
-    form.paciente.value = cirurgia.paciente;
-    form.valorBruto.value = cirurgia.valorBruto;
-    form.formaPagamento.value = cirurgia.formaPagamento;
-    form.data.value = cirurgia.data;
-    form.status.value = cirurgia.status;
-    form.observacoes.value = cirurgia.observacoes || "";
-
-    // Guardar índice em edição
-    form.dataset.editIndex = index;
-
-    // Mudar botão
-    form.querySelector("button[type='submit']").textContent = "Salvar Alterações";
-}
-
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
     // === Busca por Código de Barras (escaneamento) ===
@@ -3658,59 +3552,6 @@ function editarCirurgia(index) {
             }
         });
     })();
-
-
-// === Funções de Cirurgias com edição ===
-
-// Substituir o onsubmit do formCirurgia para suportar edição
-const formCirurgia = document.getElementById("formCirurgia");
-formCirurgia.onsubmit = function(e) {
-    e.preventDefault();
-
-    const novaCirurgia = {
-        tipo: this.tipo.value,
-        paciente: this.paciente.value,
-        valorBruto: parseFloat(this.valorBruto.value),
-        formaPagamento: this.formaPagamento.value,
-        data: this.data.value,
-        status: this.status.value,
-        observacoes: this.observacoes.value
-    };
-
-    if (this.dataset.editIndex) {
-        // Edição
-        const index = this.dataset.editIndex;
-        dados.cirurgias[index] = novaCirurgia;
-        delete this.dataset.editIndex;
-        this.querySelector("button[type='submit']").textContent = "Registrar Cirurgia";
-    } else {
-        // Novo cadastro
-        dados.cirurgias.push(novaCirurgia);
-    }
-
-    salvarDados();
-    atualizarListaCirurgias();
-    atualizarResumoCirurgias();
-    this.reset();
-};
-
-function editarCirurgia(index) {
-    const cirurgia = dados.cirurgias[index];
-    const form = document.getElementById("formCirurgia");
-    form.tipo.value = cirurgia.tipo;
-    form.paciente.value = cirurgia.paciente;
-    form.valorBruto.value = cirurgia.valorBruto;
-    form.formaPagamento.value = cirurgia.formaPagamento;
-    form.data.value = cirurgia.data;
-    form.status.value = cirurgia.status;
-    form.observacoes.value = cirurgia.observacoes || "";
-
-    // Guardar índice em edição
-    form.dataset.editIndex = index;
-
-    // Mudar botão
-    form.querySelector("button[type='submit']").textContent = "Salvar Alterações";
-}
 
 </script>
 
@@ -3858,59 +3699,6 @@ function editarCirurgia(index) {
             }
         });
     })();
-
-
-// === Funções de Cirurgias com edição ===
-
-// Substituir o onsubmit do formCirurgia para suportar edição
-const formCirurgia = document.getElementById("formCirurgia");
-formCirurgia.onsubmit = function(e) {
-    e.preventDefault();
-
-    const novaCirurgia = {
-        tipo: this.tipo.value,
-        paciente: this.paciente.value,
-        valorBruto: parseFloat(this.valorBruto.value),
-        formaPagamento: this.formaPagamento.value,
-        data: this.data.value,
-        status: this.status.value,
-        observacoes: this.observacoes.value
-    };
-
-    if (this.dataset.editIndex) {
-        // Edição
-        const index = this.dataset.editIndex;
-        dados.cirurgias[index] = novaCirurgia;
-        delete this.dataset.editIndex;
-        this.querySelector("button[type='submit']").textContent = "Registrar Cirurgia";
-    } else {
-        // Novo cadastro
-        dados.cirurgias.push(novaCirurgia);
-    }
-
-    salvarDados();
-    atualizarListaCirurgias();
-    atualizarResumoCirurgias();
-    this.reset();
-};
-
-function editarCirurgia(index) {
-    const cirurgia = dados.cirurgias[index];
-    const form = document.getElementById("formCirurgia");
-    form.tipo.value = cirurgia.tipo;
-    form.paciente.value = cirurgia.paciente;
-    form.valorBruto.value = cirurgia.valorBruto;
-    form.formaPagamento.value = cirurgia.formaPagamento;
-    form.data.value = cirurgia.data;
-    form.status.value = cirurgia.status;
-    form.observacoes.value = cirurgia.observacoes || "";
-
-    // Guardar índice em edição
-    form.dataset.editIndex = index;
-
-    // Mudar botão
-    form.querySelector("button[type='submit']").textContent = "Salvar Alterações";
-}
 
 </script>
 
