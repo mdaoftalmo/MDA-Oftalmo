@@ -998,7 +998,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Instrumentadora (R$)</label>
-                                        <input type="number" step="0.01" name="valorInstrumentadora" placeholder="0" value="0" id="valorInstrumentadora">
+                                        <input type="number" step="0.01" name="valorInstrumentadora" placeholder="200.00" value="200.00" id="valorInstrumentadora">
                                     </div>
                                     <div class="form-group">
                                         <label>Outros Custos (R$)</label>
@@ -2148,7 +2148,7 @@
                     taxaCartaoValor: 140, // 4000 * 3.5%
                     impostos: 720, // 4000 * 18%
                     comissaoOrientadora: 120, // 4000 * 3%
-                    valorInstrumentadora: 0,
+                    valorInstrumentadora: 200,
                     custoFuncionarios: 150,
                     outrosCustos: 0,
                     custoInsumos: 470.40,
@@ -2177,7 +2177,7 @@
                     taxaCartaoValor: 0,
                     impostos: 1080, // 6000 * 18%
                     comissaoOrientadora: 180, // 6000 * 3%
-                    valorInstrumentadora: 0,
+                    valorInstrumentadora: 200,
                     custoFuncionarios: 150,
                     outrosCustos: 50, // Taxa extra anestesista
                     custoInsumos: 35.20,
@@ -2205,7 +2205,7 @@
                     taxaCartaoValor: 22.50, // 1500 * 1.5%
                     impostos: 270, // 1500 * 18%
                     comissaoOrientadora: 45, // 1500 * 3%
-                    valorInstrumentadora: 0,
+                    valorInstrumentadora: 200,
                     custoFuncionarios: 150,
                     outrosCustos: 0,
                     custoInsumos: 8.90,
@@ -2340,79 +2340,41 @@
         }
 
         // === FUNÇÕES PARA CIRURGIAS ===
-        
-
-function salvarCirurgia(event) {
-    event.preventDefault();
-    
-    const form = document.getElementById('formCirurgia');
-    let idEdicaoInput = form.querySelector('[name="idEdicao"]');
-
-    const novaCirurgia = {
-        id: idEdicaoInput ? parseInt(idEdicaoInput.value) : Date.now(),
-        paciente: form.paciente.value,
-        tipo: form.tipo.value,
-        valorBruto: parseFloat(form.valorBruto.value || 0),
-        formaPagamento: form.formaPagamento.value,
-        taxaCartao: parseFloat(form.taxaCartao.value || 0),
-        comissaoOrientadora: parseFloat(form.comissaoOrientadora.value || 0),
-        valorInstrumentadora: parseFloat(form.valorInstrumentadora.value || 0),
-        outrosCustos: parseFloat(form.outrosCustos.value || 0),
-        data: form.data.value,
-        status: form.status.value,
-        observacoes: form.observacoes.value
-    };
-
-    if (idEdicaoInput) {
-        const index = dados.cirurgias.findIndex(c => c.id === parseInt(idEdicaoInput.value));
-        if (index !== -1) {
-            dados.cirurgias[index] = novaCirurgia;
-            mostrarNotificacao("✏️ Cirurgia atualizada com sucesso!", "success");
-        }
-        idEdicaoInput.remove();
-    } else {
-        dados.cirurgias.push(novaCirurgia);
-        mostrarNotificacao("✅ Cirurgia adicionada com sucesso!", "success");
-    }
-
-    form.reset();
-    atualizarTodasAsVisualizacoes();
-    salvarAutomatico();
-}
-
-
-function atualizarListaCirurgias() {
-    const lista = document.getElementById('listaCirurgias');
-    lista.innerHTML = '';
-
-    if (dados.cirurgias.length === 0) {
-        lista.innerHTML = `
-            <div class="transaction-item">
-                <div class="transaction-info">
-                    <div>Nenhuma cirurgia registrada ainda</div>
-                </div>
-            </div>`;
-        return;
-    }
-
-    dados.cirurgias.forEach(cirurgia => {
-        const item = document.createElement('div');
-        item.className = 'transaction-item';
-        item.innerHTML = `
-            <div class="transaction-info">
-                <div><strong>${cirurgia.paciente}</strong> - ${cirurgia.tipo}</div>
-                <div class="detalhes-cirurgia">
-                    Data: ${formatarData(cirurgia.data)} | Status: ${cirurgia.status} | Valor: ${formatarMoeda(cirurgia.valorBruto)}
-                </div>
-            </div>
-            <div>
-                <button class="btn" style="background:#007bff;" onclick="editarCirurgia(${cirurgia.id})">✏️ Editar</button>
-                <button class="delete-btn" onclick="excluirCirurgia(${cirurgia.id})">🗑️ Excluir</button>
-            </div>
-        `;
-        lista.appendChild(item);
-    });
-}
+        function atualizarListaCirurgias() {
+            var container = document.getElementById('listaCirurgias');
+            if (dados.cirurgias.length === 0) {
+                container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Nenhuma cirurgia registrada ainda</div></div></div>';
+            } else {
+                var html = '';
+                dados.cirurgias.forEach(function(cirurgia) {
+                    var statusClass = cirurgia.status === 'realizada' ? 'status-pago' : 
+                                    cirurgia.status === 'agendada' ? 'status-pendente' : 'status-cancelada';
+                    var margemClass = cirurgia.margem >= 50 ? 'margem-alta' : 
+                                    cirurgia.margem >= 30 ? 'margem-media' : 'margem-baixa';
+                    
+                    html += '<div class="transaction-item">';
+                    html += '<div class="transaction-info">';
+                    html += '<div><strong>' + cirurgia.paciente + '</strong> - ' + cirurgia.tipo + '</div>';
+                    html += '<div class="transaction-date">' + formatarData(cirurgia.data) + ' | ' + (cirurgia.formaPagamento || 'N/A') + '</div>';
+                    html += '<div style="font-size: 0.85em; color: #666; margin-top: 3px;">';
+                    html += 'Bruto: ' + formatarMoeda(cirurgia.valorBruto || cirurgia.valor || 0) + ' | ';
+                    html += 'Custos: ' + formatarMoeda(cirurgia.totalCustos || 0) + ' | ';
+                    html += 'Líquido: ' + formatarMoeda(cirurgia.valorLiquido || cirurgia.valor || 0);
+                    html += '</div>';
+                    html += '<div style="font-size: 0.85em; margin-top: 2px;">';
+                    html += '<span class="' + margemClass + '">Margem: ' + ((cirurgia.margem || 0).toFixed(1)) + '%</span>';
+                    html += '</div>';
+                    html += '<div style="margin-top: 5px;"><span class="' + statusClass + '">' + cirurgia.status.toUpperCase() + '</span></div>';
+                    html += '</div>';
+                    html += '<div style="text-align: right;">';
+                    html += '<div class="transaction-value receita">' + formatarMoeda(cirurgia.valorLiquido || cirurgia.valor || 0) + '</div>';
+                    html += '<button class="btn" style="font-size: 10px; padding: 3px 8px; margin: 2px;" onclick="verDetalhesCirurgia(' + cirurgia.id + ')">Ver Detalhes</button>';
+                    html += '</div>';
+                    html += '<button class="delete-btn" onclick="excluirCirurgia(' + cirurgia.id + ')">Excluir</button>';
+                    html += '</div>';
+                });
+                container.innerHTML = html;
+            }
         }
 
         function atualizarResumoCirurgias() {
@@ -2704,7 +2666,7 @@ function atualizarPreco() {
             
             var impostos = valorBruto * 0.18;
             var comissaoOrientadora = valorBruto * ((dadosCirurgia.comissaoOrientadora || 3) / 100);
-            var valorInstrumentadora = dadosCirurgia.valorInstrumentadora || 0;
+            var valorInstrumentadora = dadosCirurgia.valorInstrumentadora || 200;
             var custoFuncionarios = calcularCustoFuncionariosDia(); // Cálculo automático
             var outrosCustos = dadosCirurgia.outrosCustos || 0;
             
@@ -3196,7 +3158,7 @@ function atualizarPreco() {
                 formaPagamento: formData.get('formaPagamento'),
                 taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
                 comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
-                valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
+                valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 200,
                 outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
                 data: formData.get('data'),
                 status: formData.get('status'),
@@ -3228,7 +3190,7 @@ function atualizarPreco() {
             
             // Restaurar valores padrão
             document.getElementById('comissaoOrientadora').value = '3.0';
-            document.getElementById('valorInstrumentadora').value = '0';
+            document.getElementById('valorInstrumentadora').value = '200.00';
             
             // Limpar insumos
             document.getElementById('insumosUtilizados').innerHTML = `
@@ -3516,35 +3478,6 @@ function atualizarPreco() {
         });
     })();
 
-
-    function editarCirurgia(id) {
-        var cirurgia = dados.cirurgias.find(c => c.id === id);
-        if (!cirurgia) return;
-
-        document.querySelector('#formCirurgia [name="tipo"]').value = cirurgia.tipo;
-        document.querySelector('#formCirurgia [name="paciente"]').value = cirurgia.paciente;
-        document.querySelector('#formCirurgia [name="valorBruto"]').value = cirurgia.valorBruto;
-        document.querySelector('#formCirurgia [name="formaPagamento"]').value = cirurgia.formaPagamento;
-        document.querySelector('#formCirurgia [name="taxaCartao"]').value = cirurgia.taxaCartao;
-        document.querySelector('#formCirurgia [name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
-        document.querySelector('#formCirurgia [name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
-        document.querySelector('#formCirurgia [name="outrosCustos"]').value = cirurgia.outrosCustos;
-        document.querySelector('#formCirurgia [name="data"]').value = cirurgia.data;
-        document.querySelector('#formCirurgia [name="status"]').value = cirurgia.status;
-        document.querySelector('#formCirurgia [name="observacoes"]').value = cirurgia.observacoes;
-
-        let hiddenId = document.querySelector('#formCirurgia [name="idEdicao"]');
-        if (!hiddenId) {
-            hiddenId = document.createElement('input');
-            hiddenId.type = 'hidden';
-            hiddenId.name = 'idEdicao';
-            document.getElementById('formCirurgia').appendChild(hiddenId);
-        }
-        hiddenId.value = cirurgia.id;
-
-        mostrarNotificacao('✏️ Edite os dados e salve para atualizar a cirurgia.', 'info');
-    }
-
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
@@ -3583,35 +3516,6 @@ function atualizarPreco() {
         });
     })();
 
-
-    function editarCirurgia(id) {
-        var cirurgia = dados.cirurgias.find(c => c.id === id);
-        if (!cirurgia) return;
-
-        document.querySelector('#formCirurgia [name="tipo"]').value = cirurgia.tipo;
-        document.querySelector('#formCirurgia [name="paciente"]').value = cirurgia.paciente;
-        document.querySelector('#formCirurgia [name="valorBruto"]').value = cirurgia.valorBruto;
-        document.querySelector('#formCirurgia [name="formaPagamento"]').value = cirurgia.formaPagamento;
-        document.querySelector('#formCirurgia [name="taxaCartao"]').value = cirurgia.taxaCartao;
-        document.querySelector('#formCirurgia [name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
-        document.querySelector('#formCirurgia [name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
-        document.querySelector('#formCirurgia [name="outrosCustos"]').value = cirurgia.outrosCustos;
-        document.querySelector('#formCirurgia [name="data"]').value = cirurgia.data;
-        document.querySelector('#formCirurgia [name="status"]').value = cirurgia.status;
-        document.querySelector('#formCirurgia [name="observacoes"]').value = cirurgia.observacoes;
-
-        let hiddenId = document.querySelector('#formCirurgia [name="idEdicao"]');
-        if (!hiddenId) {
-            hiddenId = document.createElement('input');
-            hiddenId.type = 'hidden';
-            hiddenId.name = 'idEdicao';
-            document.getElementById('formCirurgia').appendChild(hiddenId);
-        }
-        hiddenId.value = cirurgia.id;
-
-        mostrarNotificacao('✏️ Edite os dados e salve para atualizar a cirurgia.', 'info');
-    }
-
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
     // === Busca por Código de Barras (escaneamento) ===
@@ -3648,35 +3552,6 @@ function atualizarPreco() {
             }
         });
     })();
-
-
-    function editarCirurgia(id) {
-        var cirurgia = dados.cirurgias.find(c => c.id === id);
-        if (!cirurgia) return;
-
-        document.querySelector('#formCirurgia [name="tipo"]').value = cirurgia.tipo;
-        document.querySelector('#formCirurgia [name="paciente"]').value = cirurgia.paciente;
-        document.querySelector('#formCirurgia [name="valorBruto"]').value = cirurgia.valorBruto;
-        document.querySelector('#formCirurgia [name="formaPagamento"]').value = cirurgia.formaPagamento;
-        document.querySelector('#formCirurgia [name="taxaCartao"]').value = cirurgia.taxaCartao;
-        document.querySelector('#formCirurgia [name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
-        document.querySelector('#formCirurgia [name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
-        document.querySelector('#formCirurgia [name="outrosCustos"]').value = cirurgia.outrosCustos;
-        document.querySelector('#formCirurgia [name="data"]').value = cirurgia.data;
-        document.querySelector('#formCirurgia [name="status"]').value = cirurgia.status;
-        document.querySelector('#formCirurgia [name="observacoes"]').value = cirurgia.observacoes;
-
-        let hiddenId = document.querySelector('#formCirurgia [name="idEdicao"]');
-        if (!hiddenId) {
-            hiddenId = document.createElement('input');
-            hiddenId.type = 'hidden';
-            hiddenId.name = 'idEdicao';
-            document.getElementById('formCirurgia').appendChild(hiddenId);
-        }
-        hiddenId.value = cirurgia.id;
-
-        mostrarNotificacao('✏️ Edite os dados e salve para atualizar a cirurgia.', 'info');
-    }
 
 </script>
 
@@ -3824,35 +3699,6 @@ function atualizarPreco() {
             }
         });
     })();
-
-
-    function editarCirurgia(id) {
-        var cirurgia = dados.cirurgias.find(c => c.id === id);
-        if (!cirurgia) return;
-
-        document.querySelector('#formCirurgia [name="tipo"]').value = cirurgia.tipo;
-        document.querySelector('#formCirurgia [name="paciente"]').value = cirurgia.paciente;
-        document.querySelector('#formCirurgia [name="valorBruto"]').value = cirurgia.valorBruto;
-        document.querySelector('#formCirurgia [name="formaPagamento"]').value = cirurgia.formaPagamento;
-        document.querySelector('#formCirurgia [name="taxaCartao"]').value = cirurgia.taxaCartao;
-        document.querySelector('#formCirurgia [name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
-        document.querySelector('#formCirurgia [name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
-        document.querySelector('#formCirurgia [name="outrosCustos"]').value = cirurgia.outrosCustos;
-        document.querySelector('#formCirurgia [name="data"]').value = cirurgia.data;
-        document.querySelector('#formCirurgia [name="status"]').value = cirurgia.status;
-        document.querySelector('#formCirurgia [name="observacoes"]').value = cirurgia.observacoes;
-
-        let hiddenId = document.querySelector('#formCirurgia [name="idEdicao"]');
-        if (!hiddenId) {
-            hiddenId = document.createElement('input');
-            hiddenId.type = 'hidden';
-            hiddenId.name = 'idEdicao';
-            document.getElementById('formCirurgia').appendChild(hiddenId);
-        }
-        hiddenId.value = cirurgia.id;
-
-        mostrarNotificacao('✏️ Edite os dados e salve para atualizar a cirurgia.', 'info');
-    }
 
 </script>
 
