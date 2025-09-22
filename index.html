@@ -2370,7 +2370,7 @@
                     html += '<div class="transaction-value receita">' + formatarMoeda(cirurgia.valorLiquido || cirurgia.valor || 0) + '</div>';
                     html += '<button class="btn" style="font-size: 10px; padding: 3px 8px; margin: 2px;" onclick="verDetalhesCirurgia(' + cirurgia.id + ')">Ver Detalhes</button>';
                     html += '</div>';
-                    html += '<button class="delete-btn" onclick="excluirCirurgia(' + cirurgia.id + ')">Excluir</button>';
+                    html += '<button class="delete-btn" onclick="excluirCirurgia(' + cirurgia.id + ')">Excluir</button> <button class="edit-btn" onclick="editarCirurgia(cirurgia.id)">Editar</button>';
                     html += '</div>';
                 });
                 container.innerHTML = html;
@@ -3478,6 +3478,35 @@ function atualizarPreco() {
         });
     })();
 
+
+    function editarCirurgia(id) {
+        var cirurgia = dados.cirurgias.find(c => c.id === id);
+        if (!cirurgia) return;
+
+        document.querySelector('#formCirurgia [name="tipo"]').value = cirurgia.tipo;
+        document.querySelector('#formCirurgia [name="paciente"]').value = cirurgia.paciente;
+        document.querySelector('#formCirurgia [name="valorBruto"]').value = cirurgia.valorBruto;
+        document.querySelector('#formCirurgia [name="formaPagamento"]').value = cirurgia.formaPagamento;
+        document.querySelector('#formCirurgia [name="taxaCartao"]').value = cirurgia.taxaCartao;
+        document.querySelector('#formCirurgia [name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
+        document.querySelector('#formCirurgia [name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
+        document.querySelector('#formCirurgia [name="outrosCustos"]').value = cirurgia.outrosCustos;
+        document.querySelector('#formCirurgia [name="data"]').value = cirurgia.data;
+        document.querySelector('#formCirurgia [name="status"]').value = cirurgia.status;
+        document.querySelector('#formCirurgia [name="observacoes"]').value = cirurgia.observacoes;
+
+        let hiddenId = document.querySelector('#formCirurgia [name="idEdicao"]');
+        if (!hiddenId) {
+            hiddenId = document.createElement('input');
+            hiddenId.type = 'hidden';
+            hiddenId.name = 'idEdicao';
+            document.getElementById('formCirurgia').appendChild(hiddenId);
+        }
+        hiddenId.value = cirurgia.id;
+
+        mostrarNotificacao('✏️ Edite os dados e salve para atualizar a cirurgia.', 'info');
+    }
+
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
@@ -3516,6 +3545,35 @@ function atualizarPreco() {
         });
     })();
 
+
+    function editarCirurgia(id) {
+        var cirurgia = dados.cirurgias.find(c => c.id === id);
+        if (!cirurgia) return;
+
+        document.querySelector('#formCirurgia [name="tipo"]').value = cirurgia.tipo;
+        document.querySelector('#formCirurgia [name="paciente"]').value = cirurgia.paciente;
+        document.querySelector('#formCirurgia [name="valorBruto"]').value = cirurgia.valorBruto;
+        document.querySelector('#formCirurgia [name="formaPagamento"]').value = cirurgia.formaPagamento;
+        document.querySelector('#formCirurgia [name="taxaCartao"]').value = cirurgia.taxaCartao;
+        document.querySelector('#formCirurgia [name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
+        document.querySelector('#formCirurgia [name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
+        document.querySelector('#formCirurgia [name="outrosCustos"]').value = cirurgia.outrosCustos;
+        document.querySelector('#formCirurgia [name="data"]').value = cirurgia.data;
+        document.querySelector('#formCirurgia [name="status"]').value = cirurgia.status;
+        document.querySelector('#formCirurgia [name="observacoes"]').value = cirurgia.observacoes;
+
+        let hiddenId = document.querySelector('#formCirurgia [name="idEdicao"]');
+        if (!hiddenId) {
+            hiddenId = document.createElement('input');
+            hiddenId.type = 'hidden';
+            hiddenId.name = 'idEdicao';
+            document.getElementById('formCirurgia').appendChild(hiddenId);
+        }
+        hiddenId.value = cirurgia.id;
+
+        mostrarNotificacao('✏️ Edite os dados e salve para atualizar a cirurgia.', 'info');
+    }
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
     // === Busca por Código de Barras (escaneamento) ===
@@ -3552,6 +3610,35 @@ function atualizarPreco() {
             }
         });
     })();
+
+
+    function editarCirurgia(id) {
+        var cirurgia = dados.cirurgias.find(c => c.id === id);
+        if (!cirurgia) return;
+
+        document.querySelector('#formCirurgia [name="tipo"]').value = cirurgia.tipo;
+        document.querySelector('#formCirurgia [name="paciente"]').value = cirurgia.paciente;
+        document.querySelector('#formCirurgia [name="valorBruto"]').value = cirurgia.valorBruto;
+        document.querySelector('#formCirurgia [name="formaPagamento"]').value = cirurgia.formaPagamento;
+        document.querySelector('#formCirurgia [name="taxaCartao"]').value = cirurgia.taxaCartao;
+        document.querySelector('#formCirurgia [name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
+        document.querySelector('#formCirurgia [name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
+        document.querySelector('#formCirurgia [name="outrosCustos"]').value = cirurgia.outrosCustos;
+        document.querySelector('#formCirurgia [name="data"]').value = cirurgia.data;
+        document.querySelector('#formCirurgia [name="status"]').value = cirurgia.status;
+        document.querySelector('#formCirurgia [name="observacoes"]').value = cirurgia.observacoes;
+
+        let hiddenId = document.querySelector('#formCirurgia [name="idEdicao"]');
+        if (!hiddenId) {
+            hiddenId = document.createElement('input');
+            hiddenId.type = 'hidden';
+            hiddenId.name = 'idEdicao';
+            document.getElementById('formCirurgia').appendChild(hiddenId);
+        }
+        hiddenId.value = cirurgia.id;
+
+        mostrarNotificacao('✏️ Edite os dados e salve para atualizar a cirurgia.', 'info');
+    }
 
 </script>
 
@@ -3699,6 +3786,35 @@ function atualizarPreco() {
             }
         });
     })();
+
+
+    function editarCirurgia(id) {
+        var cirurgia = dados.cirurgias.find(c => c.id === id);
+        if (!cirurgia) return;
+
+        document.querySelector('#formCirurgia [name="tipo"]').value = cirurgia.tipo;
+        document.querySelector('#formCirurgia [name="paciente"]').value = cirurgia.paciente;
+        document.querySelector('#formCirurgia [name="valorBruto"]').value = cirurgia.valorBruto;
+        document.querySelector('#formCirurgia [name="formaPagamento"]').value = cirurgia.formaPagamento;
+        document.querySelector('#formCirurgia [name="taxaCartao"]').value = cirurgia.taxaCartao;
+        document.querySelector('#formCirurgia [name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
+        document.querySelector('#formCirurgia [name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
+        document.querySelector('#formCirurgia [name="outrosCustos"]').value = cirurgia.outrosCustos;
+        document.querySelector('#formCirurgia [name="data"]').value = cirurgia.data;
+        document.querySelector('#formCirurgia [name="status"]').value = cirurgia.status;
+        document.querySelector('#formCirurgia [name="observacoes"]').value = cirurgia.observacoes;
+
+        let hiddenId = document.querySelector('#formCirurgia [name="idEdicao"]');
+        if (!hiddenId) {
+            hiddenId = document.createElement('input');
+            hiddenId.type = 'hidden';
+            hiddenId.name = 'idEdicao';
+            document.getElementById('formCirurgia').appendChild(hiddenId);
+        }
+        hiddenId.value = cirurgia.id;
+
+        mostrarNotificacao('✏️ Edite os dados e salve para atualizar a cirurgia.', 'info');
+    }
 
 </script>
 
