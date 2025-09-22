@@ -2340,41 +2340,39 @@
         }
 
         // === FUNÇÕES PARA CIRURGIAS ===
-        function atualizarListaCirurgias() {
-            var container = document.getElementById('listaCirurgias');
-            if (dados.cirurgias.length === 0) {
-                container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Nenhuma cirurgia registrada ainda</div></div></div>';
-            } else {
-                var html = '';
-                dados.cirurgias.forEach(function(cirurgia) {
-                    var statusClass = cirurgia.status === 'realizada' ? 'status-pago' : 
-                                    cirurgia.status === 'agendada' ? 'status-pendente' : 'status-cancelada';
-                    var margemClass = cirurgia.margem >= 50 ? 'margem-alta' : 
-                                    cirurgia.margem >= 30 ? 'margem-media' : 'margem-baixa';
-                    
-                    html += '<div class="transaction-item">';
-                    html += '<div class="transaction-info">';
-                    html += '<div><strong>' + cirurgia.paciente + '</strong> - ' + cirurgia.tipo + '</div>';
-                    html += '<div class="transaction-date">' + formatarData(cirurgia.data) + ' | ' + (cirurgia.formaPagamento || 'N/A') + '</div>';
-                    html += '<div style="font-size: 0.85em; color: #666; margin-top: 3px;">';
-                    html += 'Bruto: ' + formatarMoeda(cirurgia.valorBruto || cirurgia.valor || 0) + ' | ';
-                    html += 'Custos: ' + formatarMoeda(cirurgia.totalCustos || 0) + ' | ';
-                    html += 'Líquido: ' + formatarMoeda(cirurgia.valorLiquido || cirurgia.valor || 0);
-                    html += '</div>';
-                    html += '<div style="font-size: 0.85em; margin-top: 2px;">';
-                    html += '<span class="' + margemClass + '">Margem: ' + ((cirurgia.margem || 0).toFixed(1)) + '%</span>';
-                    html += '</div>';
-                    html += '<div style="margin-top: 5px;"><span class="' + statusClass + '">' + cirurgia.status.toUpperCase() + '</span></div>';
-                    html += '</div>';
-                    html += '<div style="text-align: right;">';
-                    html += '<div class="transaction-value receita">' + formatarMoeda(cirurgia.valorLiquido || cirurgia.valor || 0) + '</div>';
-                    html += '<button class="btn" style="font-size: 10px; padding: 3px 8px; margin: 2px;" onclick="verDetalhesCirurgia(' + cirurgia.id + ')">Ver Detalhes</button>';
-                    html += '</div>';
-                    html += '<button class="delete-btn" onclick="excluirCirurgia(' + cirurgia.id + ')">Excluir</button> <button class="edit-btn" onclick="editarCirurgia(cirurgia.id)">Editar</button>';
-                    html += '</div>';
-                });
-                container.innerHTML = html;
-            }
+        
+function atualizarListaCirurgias() {
+    const lista = document.getElementById('listaCirurgias');
+    lista.innerHTML = '';
+
+    if (dados.cirurgias.length === 0) {
+        lista.innerHTML = `
+            <div class="transaction-item">
+                <div class="transaction-info">
+                    <div>Nenhuma cirurgia registrada ainda</div>
+                </div>
+            </div>`;
+        return;
+    }
+
+    dados.cirurgias.forEach(cirurgia => {
+        const item = document.createElement('div');
+        item.className = 'transaction-item';
+        item.innerHTML = `
+            <div class="transaction-info">
+                <div><strong>${cirurgia.paciente}</strong> - ${cirurgia.tipo}</div>
+                <div class="detalhes-cirurgia">
+                    Data: ${formatarData(cirurgia.data)} | Status: ${cirurgia.status} | Valor: ${formatarMoeda(cirurgia.valorBruto)}
+                </div>
+            </div>
+            <div>
+                <button class="btn" style="background:#007bff;" onclick="editarCirurgia(${cirurgia.id})">✏️ Editar</button>
+                <button class="delete-btn" onclick="excluirCirurgia(${cirurgia.id})">🗑️ Excluir</button>
+            </div>
+        `;
+        lista.appendChild(item);
+    });
+}
         }
 
         function atualizarResumoCirurgias() {
