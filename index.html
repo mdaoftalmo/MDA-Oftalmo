@@ -2341,6 +2341,46 @@
 
         // === FUNÇÕES PARA CIRURGIAS ===
         
+
+function salvarCirurgia(event) {
+    event.preventDefault();
+    
+    const form = document.getElementById('formCirurgia');
+    let idEdicaoInput = form.querySelector('[name="idEdicao"]');
+
+    const novaCirurgia = {
+        id: idEdicaoInput ? parseInt(idEdicaoInput.value) : Date.now(),
+        paciente: form.paciente.value,
+        tipo: form.tipo.value,
+        valorBruto: parseFloat(form.valorBruto.value || 0),
+        formaPagamento: form.formaPagamento.value,
+        taxaCartao: parseFloat(form.taxaCartao.value || 0),
+        comissaoOrientadora: parseFloat(form.comissaoOrientadora.value || 0),
+        valorInstrumentadora: parseFloat(form.valorInstrumentadora.value || 0),
+        outrosCustos: parseFloat(form.outrosCustos.value || 0),
+        data: form.data.value,
+        status: form.status.value,
+        observacoes: form.observacoes.value
+    };
+
+    if (idEdicaoInput) {
+        const index = dados.cirurgias.findIndex(c => c.id === parseInt(idEdicaoInput.value));
+        if (index !== -1) {
+            dados.cirurgias[index] = novaCirurgia;
+            mostrarNotificacao("✏️ Cirurgia atualizada com sucesso!", "success");
+        }
+        idEdicaoInput.remove();
+    } else {
+        dados.cirurgias.push(novaCirurgia);
+        mostrarNotificacao("✅ Cirurgia adicionada com sucesso!", "success");
+    }
+
+    form.reset();
+    atualizarTodasAsVisualizacoes();
+    salvarAutomatico();
+}
+
+
 function atualizarListaCirurgias() {
     const lista = document.getElementById('listaCirurgias');
     lista.innerHTML = '';
