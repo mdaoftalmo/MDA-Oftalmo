@@ -998,7 +998,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Instrumentadora (R$)</label>
-                                        <input type="number" step="0.01" name="valorInstrumentadora" placeholder="200.00" value="200.00" id="valorInstrumentadora">
+                                        <input type="number" step="0.01" name="valorInstrumentadora" placeholder="00.00" value="00.00" id="valorInstrumentadora">
                                     </div>
                                     <div class="form-group">
                                         <label>Outros Custos (R$)</label>
@@ -1125,11 +1125,25 @@
                                 <h4>Margem Média</h4>
                                 <div class="value" id="margemMedia">0%</div>
                                 <style>
-                                    #cirurgias .card:last-child{
-                                        max-width: 400px;   /*largura maxima*/
-                                        margin-left: auto;  /*joga para a direita*/
-                                    }
-                                </style>
+                                    /* === AJUSTE PARA MOVER LISTA DE CIRURGIAS PARA ESQUERDA === */
+                                    #cirurgias .card:last-child {
+                                   grid-column: 1 / -1; /* Ocupa toda a largura */
+                                   margin-left: 0; /* Remove margem à esquerda */
+                                 margin-right: 0; /* Remove margem à direita */
+                                max-width: none; /* Remove limite máximo de largura */
+                                                                                       }
+
+                                 /* Ajuste específico para o grid de cirurgias */
+                                        #cirurgias .grid {
+    margin-bottom: 0; /* Remove margem inferior do grid */
+                                                                 }
+
+                                /* Garantir que a lista ocupe toda a largura disponível */
+                                            #listaCirurgias {
+                            width: 100%;
+                          max-width: none;
+                                        }
+                              </style>
                             </div>
                         </div>
                     </div>
@@ -2148,7 +2162,7 @@
                     taxaCartaoValor: 140, // 4000 * 3.5%
                     impostos: 720, // 4000 * 18%
                     comissaoOrientadora: 120, // 4000 * 3%
-                    valorInstrumentadora: 200,
+                    valorInstrumentadora: 0,
                     custoFuncionarios: 150,
                     outrosCustos: 0,
                     custoInsumos: 470.40,
@@ -2177,7 +2191,7 @@
                     taxaCartaoValor: 0,
                     impostos: 1080, // 6000 * 18%
                     comissaoOrientadora: 180, // 6000 * 3%
-                    valorInstrumentadora: 200,
+                    valorInstrumentadora: 0,
                     custoFuncionarios: 150,
                     outrosCustos: 50, // Taxa extra anestesista
                     custoInsumos: 35.20,
@@ -2205,7 +2219,7 @@
                     taxaCartaoValor: 22.50, // 1500 * 1.5%
                     impostos: 270, // 1500 * 18%
                     comissaoOrientadora: 45, // 1500 * 3%
-                    valorInstrumentadora: 200,
+                    valorInstrumentadora: 0,
                     custoFuncionarios: 150,
                     outrosCustos: 0,
                     custoInsumos: 8.90,
@@ -2338,8 +2352,58 @@
                 mostrarNotificacao('🎯 Dados de exemplo adicionados com sucesso! Explore todas as abas para ver as funcionalidades.', 'success');
             }
         }
+                      function editarCirurgia(id) {
+    var cirurgia = dados.cirurgias.find(c => c.id === id);
+    if (!cirurgia) return;
 
-        // === FUNÇÕES PARA CIRURGIAS ===
+    // Preencher os campos do formulário com os dados da cirurgia
+    document.querySelector('input[name="tipo"]').value = cirurgia.tipo;
+    document.querySelector('input[name="paciente"]').value = cirurgia.paciente;
+    document.querySelector('input[name="valorBruto"]').value = cirurgia.valorBruto;
+    document.querySelector('select[name="formaPagamento"]').value = cirurgia.formaPagamento;
+    document.querySelector('input[name="taxaCartao"]').value = cirurgia.taxaCartao || '';
+    document.querySelector('input[name="data"]').value = cirurgia.data;
+    document.querySelector('select[name="status"]').value = cirurgia.status;
+    document.querySelector('textarea[name="observacoes"]').value = cirurgia.observacoes || '';
+
+    // Custos operacionais
+    document.getElementById('comissaoOrientadora').value = cirurgia.comissaoOrientadora || 3.0;
+    document.getElementById('valorInstrumentadora').value = cirurgia.valorInstrumentadora || 200.00;
+    document.getElementById('outrosCustos').value = cirurgia.outrosCustos || 0;
+
+    // Limpar e carregar insumos utilizados
+    document.getElementById('insumosUtilizados').innerHTML = '';
+    if (cirurgia.insumosUtilizados && cirurgia.insumosUtilizados.length > 0) {
+        cirurgia.insumosUtilizados.forEach(insumo => {
+            adicionarLinhaInsumoEditavel(insumo);
+        });
+    } else {
+        adicionarLinhaInsumo();
+    }
+
+    // Mostrar/ocultar taxa de cartão
+    var taxaGroup = document.getElementById('taxaCartaoGroup');
+    taxaGroup.style.display = cirurgia.formaPagamento.includes('cartao') ? 'block' : 'none';
+
+    // Atualizar cálculos
+    calcularResumoFinanceiro();
+
+    // Rolar para o topo e alterar botão para "Atualizar"
+    document.getElementById('formCirurgia').scrollIntoView({ behavior: 'smooth' });
+    var submitBtn = document.querySelector('#formCirurgia button[type="submit"]');
+    submitBtn.textContent = 'Atualizar Cirurgia';
+    submitBtn.onclick = function(e) {
+        e.preventDefault();
+        atualizarCirurgia(id);
+    };
+
+    // Adicionar botão "Cancelar edição"
+    adicionarBotaoCancelarEdicao();
+
+    mostrarNotificacao('✏️ Editando cirurgia de ' + cirurgia.paciente, 'info');
+}
+
+     // === FUNÇÕES PARA CIRURGIAS ===
         function atualizarListaCirurgias() {
             var container = document.getElementById('listaCirurgias');
             if (dados.cirurgias.length === 0) {
@@ -2666,7 +2730,7 @@ function atualizarPreco() {
             
             var impostos = valorBruto * 0.18;
             var comissaoOrientadora = valorBruto * ((dadosCirurgia.comissaoOrientadora || 3) / 100);
-            var valorInstrumentadora = dadosCirurgia.valorInstrumentadora || 200;
+            var valorInstrumentadora = dadosCirurgia.valorInstrumentadora || 0;
             var custoFuncionarios = calcularCustoFuncionariosDia(); // Cálculo automático
             var outrosCustos = dadosCirurgia.outrosCustos || 0;
             
@@ -3158,7 +3222,7 @@ function atualizarPreco() {
                 formaPagamento: formData.get('formaPagamento'),
                 taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
                 comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
-                valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 200,
+                valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
                 outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
                 data: formData.get('data'),
                 status: formData.get('status'),
@@ -3190,7 +3254,7 @@ function atualizarPreco() {
             
             // Restaurar valores padrão
             document.getElementById('comissaoOrientadora').value = '3.0';
-            document.getElementById('valorInstrumentadora').value = '200.00';
+            document.getElementById('valorInstrumentadora').value = '0,00';
             
             // Limpar insumos
             document.getElementById('insumosUtilizados').innerHTML = `
@@ -3200,7 +3264,7 @@ function atualizarPreco() {
                     </select>
                     <input type="number" class="quantidade-insumo" placeholder="Qtd" style="width: 80px;" min="1">
                     <span class="preco-insumo" style="width: 100px; font-weight: bold;"></span>
-                    <button type="button" class="btn-remover-insumo" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px;">Remover</button>
+                    <button type="button" class="btn-remover-insumo" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-none: 3px;">Remover</button>
                 </div>
             `;
             
@@ -3380,7 +3444,240 @@ function atualizarPreco() {
             atualizarStatusSalvamento();
         });
 
-        function configurarEventosCirurgia() {
+            function editarCirurgia(id) {
+    var cirurgia = dados.cirurgias.find(c => c.id === id);
+    if (!cirurgia) return;
+    
+    // Preencher formulário com dados existentes
+    document.querySelector('input[name="tipo"]').value = cirurgia.tipo;
+    document.querySelector('input[name="paciente"]').value = cirurgia.paciente;
+    document.querySelector('input[name="valorBruto"]').value = cirurgia.valorBruto;
+    document.querySelector('select[name="formaPagamento"]').value = cirurgia.formaPagamento;
+    document.querySelector('input[name="taxaCartao"]').value = cirurgia.taxaCartao || '';
+    document.querySelector('input[name="data"]').value = cirurgia.data;
+    document.querySelector('select[name="status"]').value = cirurgia.status;
+    document.querySelector('textarea[name="observacoes"]').value = cirurgia.observacoes || '';
+    
+    // Custos operacionais
+    document.getElementById('comissaoOrientadora').value = cirurgia.comissaoOrientadora || 3.0;
+    document.getElementById('valorInstrumentadora').value = cirurgia.valorInstrumentadora || 200.00;
+    document.getElementById('outrosCustos').value = cirurgia.outrosCustos || 0;
+    
+    // Limpar e preencher insumos
+    document.getElementById('insumosUtilizados').innerHTML = '';
+    
+    if (cirurgia.insumosUtilizados && cirurgia.insumosUtilizados.length > 0) {
+        cirurgia.insumosUtilizados.forEach(function(insumo) {
+            adicionarLinhaInsumoEditavel(insumo);
+        });
+    } else {
+        adicionarLinhaInsumo();
+    }
+    
+    // Mostrar/ocultar taxa de cartão
+    var taxaGroup = document.getElementById('taxaCartaoGroup');
+    if (cirurgia.formaPagamento.includes('cartao')) {
+        taxaGroup.style.display = 'block';
+    } else {
+        taxaGroup.style.display = 'none';
+    }
+    
+    // Atualizar cálculos
+    calcularResumoFinanceiro();
+    
+    // Rolar para o topo do formulário
+    document.getElementById('formCirurgia').scrollIntoView({ behavior: 'smooth' });
+    
+    // Alterar botão para modo edição
+    var submitBtn = document.querySelector('#formCirurgia button[type="submit"]');
+    submitBtn.textContent = 'Atualizar Cirurgia';
+    submitBtn.onclick = function(e) {
+        e.preventDefault();
+        atualizarCirurgia(id);
+    };
+    
+    // Adicionar botão cancelar edição
+    adicionarBotaoCancelarEdicao();
+    
+    mostrarNotificacao('✏️ Editando cirurgia de ' + cirurgia.paciente, 'info');
+}
+
+function adicionarLinhaInsumoEditavel(insumoUtilizado) {
+    var container = document.getElementById('insumosUtilizados');
+    var novaLinha = document.createElement('div');
+    novaLinha.className = 'insumo-item';
+    novaLinha.style.cssText = 'display: flex; gap: 10px; margin: 10px 0; align-items: center;';
+    
+    novaLinha.innerHTML = `
+        <input type="text" class="codigo-barras-insumo" placeholder="Escaneie o código" style="flex: 2;" value="${insumoUtilizado.codigoBarras || ''}">
+        <select class="insumo-select" style="flex: 2;">
+            <option value="">Selecione um insumo...</option>
+        </select>
+        <input type="number" class="quantidade-insumo" placeholder="Qtd" style="width: 80px;" min="1" value="${insumoUtilizado.quantidade || 1}">
+        <span class="preco-insumo" style="width: 100px; font-weight: bold;">${formatarMoeda(insumoUtilizado.total || 0)}</span>
+        <button type="button" class="btn-remover-insumo" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; flex-shrink: 0; margin-left: 5px;">Remover</button>
+    `;
+    
+    container.appendChild(novaLinha);
+    carregarInsumosNoSelect();
+    
+    // Selecionar o insumo correto
+    setTimeout(function() {
+        var select = novaLinha.querySelector('.insumo-select');
+        select.value = insumoUtilizado.id;
+        select.dispatchEvent(new Event('change'));
+    }, 100);
+    
+    configurarEventosInsumo(novaLinha);
+}
+
+function atualizarCirurgia(id) {
+    if (!usuarioLogado) return;
+    
+    var formData = new FormData(document.getElementById('formCirurgia'));
+    var cirurgiaIndex = dados.cirurgias.findIndex(c => c.id === id);
+    
+    if (cirurgiaIndex === -1) return;
+    
+    var dadosBasicos = {
+        id: id, // Mantém o mesmo ID
+        tipo: formData.get('tipo'),
+        paciente: formData.get('paciente'),
+        valorBruto: parseFloat(formData.get('valorBruto')),
+        formaPagamento: formData.get('formaPagamento'),
+        taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
+        comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+        valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 200,
+        outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
+        data: formData.get('data'),
+        status: formData.get('status'),
+        observacoes: formData.get('observacoes')
+    };
+    
+    // Processar cirurgia com cálculos atualizados
+    var cirurgiaAtualizada = processarCirurgia(dadosBasicos);
+    
+    // Atualizar a cirurgia no array
+    dados.cirurgias[cirurgiaIndex] = cirurgiaAtualizada;
+    
+    // Atualizar receita correspondente se necessário
+    atualizarReceitaCirurgia(cirurgiaAtualizada);
+    
+    // Restaurar formulário para modo normal
+    cancelarEdicao();
+    
+    atualizarTodasAsVisualizacoes();
+    salvarAutomatico();
+    mostrarNotificacao('✅ Cirurgia atualizada com sucesso!', 'success');
+}
+
+function atualizarReceitaCirurgia(cirurgia) {
+    if (cirurgia.status === 'realizada' && cirurgia.valorLiquido > 0) {
+        const descricaoReceita = `Líquido da Cirurgia: ${cirurgia.paciente} (${cirurgia.tipo})`;
+        
+        // Remove receita antiga se existir
+        dados.receitas = dados.receitas.filter(r => !r.descricao.includes(`Líquido da Cirurgia: ${cirurgia.paciente}`));
+        
+        // Adiciona nova receita
+        const novaReceita = {
+            id: Date.now(),
+            fonte: 'cirurgias',
+            descricao: descricaoReceita,
+            valor: cirurgia.valorLiquido,
+            data: cirurgia.data
+        };
+        dados.receitas.push(novaReceita);
+    }
+}
+
+function adicionarBotaoCancelarEdicao() {
+    // Remove botão existente se houver
+    var botaoExistente = document.getElementById('cancelarEdicao');
+    if (botaoExistente) botaoExistente.remove();
+    
+    var botaoCancelar = document.createElement('button');
+    botaoCancelar.id = 'cancelarEdicao';
+    botaoCancelar.type = 'button';
+    botaoCancelar.textContent = '❌ Cancelar Edição';
+    botaoCancelar.style.cssText = 'background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 5px;';
+    botaoCancelar.onclick = cancelarEdicao;
+    
+    document.getElementById('formCirurgia').appendChild(botaoCancelar);
+}
+
+function cancelarEdicao() {
+    // Restaurar formulário
+    document.getElementById('formCirurgia').reset();
+    document.querySelector('input[type="date"]').value = new Date().toISOString().slice(0, 10);
+    
+    // Restaurar botão original
+    var submitBtn = document.querySelector('#formCirurgia button[type="submit"]');
+    submitBtn.textContent = 'Registrar Cirurgia';
+    submitBtn.onclick = null;
+    
+    // Remover botão cancelar
+    var botaoCancelar = document.getElementById('cancelarEdicao');
+    if (botaoCancelar) botaoCancelar.remove();
+    
+    // Limpar insumos
+    document.getElementById('insumosUtilizados').innerHTML = `
+        <div class="insumo-item" style="display: flex; gap: 10px; margin: 10px 0; align-items: center;">
+            <select class="insumo-select" style="flex: 2;">
+                <option value="">Selecione um insumo...</option>
+            </select>
+            <input type="number" class="quantidade-insumo" placeholder="Qtd" style="width: 80px;" min="1">
+            <span class="preco-insumo" style="width: 100px; font-weight: bold;"></span>
+            <button type="button" class="btn-remover-insumo" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px;">Remover</button>
+        </div>
+    `;
+    
+    // Restaurar valores padrão
+    document.getElementById('comissaoOrientadora').value = '3.0';
+    document.getElementById('valorInstrumentadora').value = '200.00';
+    document.getElementById('taxaCartaoGroup').style.display = 'none';
+    
+    carregarInsumosNoSelect();
+    configurarEventosInsumo(document.querySelector('.insumo-item'));
+    calcularResumoFinanceiro();
+}
+               function atualizarListaCirurgias() {
+    var container = document.getElementById('listaCirurgias');
+    if (dados.cirurgias.length === 0) {
+        container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Nenhuma cirurgia registrada ainda</div></div></div>';
+    } else {
+        var html = '';
+        dados.cirurgias.forEach(function(cirurgia) {
+            var statusClass = cirurgia.status === 'realizada' ? 'status-pago' : 
+                            cirurgia.status === 'agendada' ? 'status-pendente' : 'status-cancelada';
+            var margemClass = cirurgia.margem >= 50 ? 'margem-alta' : 
+                            cirurgia.margem >= 30 ? 'margem-media' : 'margem-baixa';
+            
+            html += '<div class="transaction-item">';
+            html += '<div class="transaction-info">';
+            html += '<div><strong>' + cirurgia.paciente + '</strong> - ' + cirurgia.tipo + '</div>';
+            html += '<div class="transaction-date">' + formatarData(cirurgia.data) + ' | ' + (cirurgia.formaPagamento || 'N/A') + '</div>';
+            html += '<div style="font-size: 0.85em; color: #666; margin-top: 3px;">';
+            html += 'Bruto: ' + formatarMoeda(cirurgia.valorBruto || cirurgia.valor || 0) + ' | ';
+            html += 'Custos: ' + formatarMoeda(cirurgia.totalCustos || 0) + ' | ';
+            html += 'Líquido: ' + formatarMoeda(cirurgia.valorLiquido || cirurgia.valor || 0);
+            html += '</div>';
+            html += '<div style="font-size: 0.85em; margin-top: 2px;">';
+            html += '<span class="' + margemClass + '">Margem: ' + ((cirurgia.margem || 0).toFixed(1)) + '%</span>';
+            html += '</div>';
+            html += '<div style="margin-top: 5px;"><span class="' + statusClass + '">' + cirurgia.status.toUpperCase() + '</span></div>';
+            html += '</div>';
+            html += '<div style="text-align: right;">';
+            html += '<div class="transaction-value receita">' + formatarMoeda(cirurgia.valorLiquido || cirurgia.valor || 0) + '</div>';
+            html += '<button class="btn" style="font-size: 10px; padding: 3px 8px; margin: 2px;" onclick="editarCirurgia(' + cirurgia.id + ')">✏️ Editar</button>';
+            html += '<button class="btn" style="font-size: 10px; padding: 3px 8px; margin: 2px; background: #17a2b8;" onclick="verDetalhesCirurgia(' + cirurgia.id + ')">👁️ Detalhes</button>';
+            html += '</div>';
+            html += '<button class="delete-btn" onclick="excluirCirurgia(' + cirurgia.id + ')">Excluir</button>';
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    }
+}
+             function configurarEventosCirurgia() {
             // Event listeners para cálculo automático
             document.getElementById('valorBrutoCirurgia').addEventListener('input', calcularResumoFinanceiro);
             document.getElementById('comissaoOrientadora').addEventListener('input', calcularResumoFinanceiro);
