@@ -3775,6 +3775,94 @@ function cancelarEdicao() {
         });
     })();
 
+
+// === Função para editar cirurgia ===
+function editarCirurgia(id) {
+    var cirurgia = dados.cirurgias.find(c => c.id === id);
+    if (!cirurgia) return;
+
+    // Preencher formulário com os dados da cirurgia selecionada
+    document.querySelector('#formCirurgia select[name="tipo"]').value = cirurgia.tipo;
+    document.querySelector('#formCirurgia input[name="paciente"]').value = cirurgia.paciente;
+    document.querySelector('#formCirurgia input[name="valorBruto"]').value = cirurgia.valorBruto;
+    document.querySelector('#formCirurgia select[name="formaPagamento"]').value = cirurgia.formaPagamento;
+    document.querySelector('#formCirurgia input[name="taxaCartao"]').value = cirurgia.taxaCartao;
+    document.querySelector('#formCirurgia input[name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
+    document.querySelector('#formCirurgia input[name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
+    document.querySelector('#formCirurgia input[name="outrosCustos"]').value = cirurgia.outrosCustos;
+    document.querySelector('#formCirurgia input[name="data"]').value = cirurgia.data;
+    document.querySelector('#formCirurgia select[name="status"]').value = cirurgia.status;
+    document.querySelector('#formCirurgia textarea[name="observacoes"]').value = cirurgia.observacoes;
+
+    // Alterar botão principal para modo edição
+    var submitBtn = document.querySelector('#formCirurgia button[type="submit"]');
+    submitBtn.textContent = '💾 Salvar Alterações';
+    submitBtn.onclick = function(e) {
+        e.preventDefault();
+        atualizarCirurgia(id);
+    };
+
+    adicionarBotaoCancelarEdicao();
+}
+
+// === Função para atualizar cirurgia ===
+function atualizarCirurgia(id) {
+    var formData = new FormData(document.getElementById('formCirurgia'));
+    var cirurgiaIndex = dados.cirurgias.findIndex(c => c.id === id);
+    if (cirurgiaIndex === -1) return;
+
+    var dadosBasicos = {
+        id: id,
+        tipo: formData.get('tipo'),
+        paciente: formData.get('paciente'),
+        valorBruto: parseFloat(formData.get('valorBruto')),
+        formaPagamento: formData.get('formaPagamento'),
+        taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
+        comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+        valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
+        outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
+        data: formData.get('data'),
+        status: formData.get('status'),
+        observacoes: formData.get('observacoes')
+    };
+
+    var cirurgiaAtualizada = processarCirurgia(dadosBasicos);
+    dados.cirurgias[cirurgiaIndex] = cirurgiaAtualizada;
+
+    atualizarReceitaCirurgia(cirurgiaAtualizada);
+    cancelarEdicao();
+    atualizarTodasAsVisualizacoes();
+    salvarAutomatico();
+    mostrarNotificacao('✅ Cirurgia atualizada com sucesso!', 'success');
+}
+
+// === Função para cancelar edição ===
+function cancelarEdicao() {
+    var form = document.getElementById('formCirurgia');
+    form.reset();
+
+    var submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.textContent = 'Registrar Cirurgia';
+    submitBtn.onclick = null;
+
+    var cancelarBtn = document.getElementById('cancelarEdicaoBtn');
+    if (cancelarBtn) cancelarBtn.remove();
+}
+
+// === Adiciona botão cancelar ===
+function adicionarBotaoCancelarEdicao() {
+    if (document.getElementById('cancelarEdicaoBtn')) return;
+    var form = document.getElementById('formCirurgia');
+    var cancelarBtn = document.createElement('button');
+    cancelarBtn.id = 'cancelarEdicaoBtn';
+    cancelarBtn.type = 'button';
+    cancelarBtn.textContent = '❌ Cancelar';
+    cancelarBtn.className = 'btn';
+    cancelarBtn.style.background = '#dc3545';
+    cancelarBtn.onclick = cancelarEdicao;
+    form.appendChild(cancelarBtn);
+}
+
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
@@ -3813,6 +3901,94 @@ function cancelarEdicao() {
         });
     })();
 
+
+// === Função para editar cirurgia ===
+function editarCirurgia(id) {
+    var cirurgia = dados.cirurgias.find(c => c.id === id);
+    if (!cirurgia) return;
+
+    // Preencher formulário com os dados da cirurgia selecionada
+    document.querySelector('#formCirurgia select[name="tipo"]').value = cirurgia.tipo;
+    document.querySelector('#formCirurgia input[name="paciente"]').value = cirurgia.paciente;
+    document.querySelector('#formCirurgia input[name="valorBruto"]').value = cirurgia.valorBruto;
+    document.querySelector('#formCirurgia select[name="formaPagamento"]').value = cirurgia.formaPagamento;
+    document.querySelector('#formCirurgia input[name="taxaCartao"]').value = cirurgia.taxaCartao;
+    document.querySelector('#formCirurgia input[name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
+    document.querySelector('#formCirurgia input[name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
+    document.querySelector('#formCirurgia input[name="outrosCustos"]').value = cirurgia.outrosCustos;
+    document.querySelector('#formCirurgia input[name="data"]').value = cirurgia.data;
+    document.querySelector('#formCirurgia select[name="status"]').value = cirurgia.status;
+    document.querySelector('#formCirurgia textarea[name="observacoes"]').value = cirurgia.observacoes;
+
+    // Alterar botão principal para modo edição
+    var submitBtn = document.querySelector('#formCirurgia button[type="submit"]');
+    submitBtn.textContent = '💾 Salvar Alterações';
+    submitBtn.onclick = function(e) {
+        e.preventDefault();
+        atualizarCirurgia(id);
+    };
+
+    adicionarBotaoCancelarEdicao();
+}
+
+// === Função para atualizar cirurgia ===
+function atualizarCirurgia(id) {
+    var formData = new FormData(document.getElementById('formCirurgia'));
+    var cirurgiaIndex = dados.cirurgias.findIndex(c => c.id === id);
+    if (cirurgiaIndex === -1) return;
+
+    var dadosBasicos = {
+        id: id,
+        tipo: formData.get('tipo'),
+        paciente: formData.get('paciente'),
+        valorBruto: parseFloat(formData.get('valorBruto')),
+        formaPagamento: formData.get('formaPagamento'),
+        taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
+        comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+        valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
+        outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
+        data: formData.get('data'),
+        status: formData.get('status'),
+        observacoes: formData.get('observacoes')
+    };
+
+    var cirurgiaAtualizada = processarCirurgia(dadosBasicos);
+    dados.cirurgias[cirurgiaIndex] = cirurgiaAtualizada;
+
+    atualizarReceitaCirurgia(cirurgiaAtualizada);
+    cancelarEdicao();
+    atualizarTodasAsVisualizacoes();
+    salvarAutomatico();
+    mostrarNotificacao('✅ Cirurgia atualizada com sucesso!', 'success');
+}
+
+// === Função para cancelar edição ===
+function cancelarEdicao() {
+    var form = document.getElementById('formCirurgia');
+    form.reset();
+
+    var submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.textContent = 'Registrar Cirurgia';
+    submitBtn.onclick = null;
+
+    var cancelarBtn = document.getElementById('cancelarEdicaoBtn');
+    if (cancelarBtn) cancelarBtn.remove();
+}
+
+// === Adiciona botão cancelar ===
+function adicionarBotaoCancelarEdicao() {
+    if (document.getElementById('cancelarEdicaoBtn')) return;
+    var form = document.getElementById('formCirurgia');
+    var cancelarBtn = document.createElement('button');
+    cancelarBtn.id = 'cancelarEdicaoBtn';
+    cancelarBtn.type = 'button';
+    cancelarBtn.textContent = '❌ Cancelar';
+    cancelarBtn.className = 'btn';
+    cancelarBtn.style.background = '#dc3545';
+    cancelarBtn.onclick = cancelarEdicao;
+    form.appendChild(cancelarBtn);
+}
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
     // === Busca por Código de Barras (escaneamento) ===
@@ -3849,6 +4025,94 @@ function cancelarEdicao() {
             }
         });
     })();
+
+
+// === Função para editar cirurgia ===
+function editarCirurgia(id) {
+    var cirurgia = dados.cirurgias.find(c => c.id === id);
+    if (!cirurgia) return;
+
+    // Preencher formulário com os dados da cirurgia selecionada
+    document.querySelector('#formCirurgia select[name="tipo"]').value = cirurgia.tipo;
+    document.querySelector('#formCirurgia input[name="paciente"]').value = cirurgia.paciente;
+    document.querySelector('#formCirurgia input[name="valorBruto"]').value = cirurgia.valorBruto;
+    document.querySelector('#formCirurgia select[name="formaPagamento"]').value = cirurgia.formaPagamento;
+    document.querySelector('#formCirurgia input[name="taxaCartao"]').value = cirurgia.taxaCartao;
+    document.querySelector('#formCirurgia input[name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
+    document.querySelector('#formCirurgia input[name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
+    document.querySelector('#formCirurgia input[name="outrosCustos"]').value = cirurgia.outrosCustos;
+    document.querySelector('#formCirurgia input[name="data"]').value = cirurgia.data;
+    document.querySelector('#formCirurgia select[name="status"]').value = cirurgia.status;
+    document.querySelector('#formCirurgia textarea[name="observacoes"]').value = cirurgia.observacoes;
+
+    // Alterar botão principal para modo edição
+    var submitBtn = document.querySelector('#formCirurgia button[type="submit"]');
+    submitBtn.textContent = '💾 Salvar Alterações';
+    submitBtn.onclick = function(e) {
+        e.preventDefault();
+        atualizarCirurgia(id);
+    };
+
+    adicionarBotaoCancelarEdicao();
+}
+
+// === Função para atualizar cirurgia ===
+function atualizarCirurgia(id) {
+    var formData = new FormData(document.getElementById('formCirurgia'));
+    var cirurgiaIndex = dados.cirurgias.findIndex(c => c.id === id);
+    if (cirurgiaIndex === -1) return;
+
+    var dadosBasicos = {
+        id: id,
+        tipo: formData.get('tipo'),
+        paciente: formData.get('paciente'),
+        valorBruto: parseFloat(formData.get('valorBruto')),
+        formaPagamento: formData.get('formaPagamento'),
+        taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
+        comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+        valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
+        outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
+        data: formData.get('data'),
+        status: formData.get('status'),
+        observacoes: formData.get('observacoes')
+    };
+
+    var cirurgiaAtualizada = processarCirurgia(dadosBasicos);
+    dados.cirurgias[cirurgiaIndex] = cirurgiaAtualizada;
+
+    atualizarReceitaCirurgia(cirurgiaAtualizada);
+    cancelarEdicao();
+    atualizarTodasAsVisualizacoes();
+    salvarAutomatico();
+    mostrarNotificacao('✅ Cirurgia atualizada com sucesso!', 'success');
+}
+
+// === Função para cancelar edição ===
+function cancelarEdicao() {
+    var form = document.getElementById('formCirurgia');
+    form.reset();
+
+    var submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.textContent = 'Registrar Cirurgia';
+    submitBtn.onclick = null;
+
+    var cancelarBtn = document.getElementById('cancelarEdicaoBtn');
+    if (cancelarBtn) cancelarBtn.remove();
+}
+
+// === Adiciona botão cancelar ===
+function adicionarBotaoCancelarEdicao() {
+    if (document.getElementById('cancelarEdicaoBtn')) return;
+    var form = document.getElementById('formCirurgia');
+    var cancelarBtn = document.createElement('button');
+    cancelarBtn.id = 'cancelarEdicaoBtn';
+    cancelarBtn.type = 'button';
+    cancelarBtn.textContent = '❌ Cancelar';
+    cancelarBtn.className = 'btn';
+    cancelarBtn.style.background = '#dc3545';
+    cancelarBtn.onclick = cancelarEdicao;
+    form.appendChild(cancelarBtn);
+}
 
 </script>
 
@@ -3996,6 +4260,94 @@ function cancelarEdicao() {
             }
         });
     })();
+
+
+// === Função para editar cirurgia ===
+function editarCirurgia(id) {
+    var cirurgia = dados.cirurgias.find(c => c.id === id);
+    if (!cirurgia) return;
+
+    // Preencher formulário com os dados da cirurgia selecionada
+    document.querySelector('#formCirurgia select[name="tipo"]').value = cirurgia.tipo;
+    document.querySelector('#formCirurgia input[name="paciente"]').value = cirurgia.paciente;
+    document.querySelector('#formCirurgia input[name="valorBruto"]').value = cirurgia.valorBruto;
+    document.querySelector('#formCirurgia select[name="formaPagamento"]').value = cirurgia.formaPagamento;
+    document.querySelector('#formCirurgia input[name="taxaCartao"]').value = cirurgia.taxaCartao;
+    document.querySelector('#formCirurgia input[name="comissaoOrientadora"]').value = cirurgia.comissaoOrientadora;
+    document.querySelector('#formCirurgia input[name="valorInstrumentadora"]').value = cirurgia.valorInstrumentadora;
+    document.querySelector('#formCirurgia input[name="outrosCustos"]').value = cirurgia.outrosCustos;
+    document.querySelector('#formCirurgia input[name="data"]').value = cirurgia.data;
+    document.querySelector('#formCirurgia select[name="status"]').value = cirurgia.status;
+    document.querySelector('#formCirurgia textarea[name="observacoes"]').value = cirurgia.observacoes;
+
+    // Alterar botão principal para modo edição
+    var submitBtn = document.querySelector('#formCirurgia button[type="submit"]');
+    submitBtn.textContent = '💾 Salvar Alterações';
+    submitBtn.onclick = function(e) {
+        e.preventDefault();
+        atualizarCirurgia(id);
+    };
+
+    adicionarBotaoCancelarEdicao();
+}
+
+// === Função para atualizar cirurgia ===
+function atualizarCirurgia(id) {
+    var formData = new FormData(document.getElementById('formCirurgia'));
+    var cirurgiaIndex = dados.cirurgias.findIndex(c => c.id === id);
+    if (cirurgiaIndex === -1) return;
+
+    var dadosBasicos = {
+        id: id,
+        tipo: formData.get('tipo'),
+        paciente: formData.get('paciente'),
+        valorBruto: parseFloat(formData.get('valorBruto')),
+        formaPagamento: formData.get('formaPagamento'),
+        taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
+        comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+        valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
+        outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
+        data: formData.get('data'),
+        status: formData.get('status'),
+        observacoes: formData.get('observacoes')
+    };
+
+    var cirurgiaAtualizada = processarCirurgia(dadosBasicos);
+    dados.cirurgias[cirurgiaIndex] = cirurgiaAtualizada;
+
+    atualizarReceitaCirurgia(cirurgiaAtualizada);
+    cancelarEdicao();
+    atualizarTodasAsVisualizacoes();
+    salvarAutomatico();
+    mostrarNotificacao('✅ Cirurgia atualizada com sucesso!', 'success');
+}
+
+// === Função para cancelar edição ===
+function cancelarEdicao() {
+    var form = document.getElementById('formCirurgia');
+    form.reset();
+
+    var submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.textContent = 'Registrar Cirurgia';
+    submitBtn.onclick = null;
+
+    var cancelarBtn = document.getElementById('cancelarEdicaoBtn');
+    if (cancelarBtn) cancelarBtn.remove();
+}
+
+// === Adiciona botão cancelar ===
+function adicionarBotaoCancelarEdicao() {
+    if (document.getElementById('cancelarEdicaoBtn')) return;
+    var form = document.getElementById('formCirurgia');
+    var cancelarBtn = document.createElement('button');
+    cancelarBtn.id = 'cancelarEdicaoBtn';
+    cancelarBtn.type = 'button';
+    cancelarBtn.textContent = '❌ Cancelar';
+    cancelarBtn.className = 'btn';
+    cancelarBtn.style.background = '#dc3545';
+    cancelarBtn.onclick = cancelarEdicao;
+    form.appendChild(cancelarBtn);
+}
 
 </script>
 
