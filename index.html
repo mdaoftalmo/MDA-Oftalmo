@@ -3805,12 +3805,26 @@ function editarCirurgia(id) {
     adicionarBotaoCancelarEdicao();
 }
 
+
 // === Função para atualizar cirurgia ===
 function atualizarCirurgia(id) {
     var formData = new FormData(document.getElementById('formCirurgia'));
     var cirurgiaIndex = dados.cirurgias.findIndex(c => c.id === id);
     if (cirurgiaIndex === -1) return;
 
+    var cirurgiaAntiga = dados.cirurgias[cirurgiaIndex];
+
+    // 1. Devolver insumos antigos ao estoque
+    if (cirurgiaAntiga.insumos && cirurgiaAntiga.insumos.length > 0) {
+        cirurgiaAntiga.insumos.forEach(item => {
+            var insumoEstoque = dados.insumos.find(i => i.codigoBarras === item.codigoBarras);
+            if (insumoEstoque) {
+                insumoEstoque.quantidade += item.quantidade; // devolve ao estoque
+            }
+        });
+    }
+
+    // 2. Montar dados novos
     var dadosBasicos = {
         id: id,
         tipo: formData.get('tipo'),
@@ -3823,9 +3837,24 @@ function atualizarCirurgia(id) {
         outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
         data: formData.get('data'),
         status: formData.get('status'),
-        observacoes: formData.get('observacoes')
+        observacoes: formData.get('observacoes'),
+        insumos: []
     };
 
+    // 3. Ler insumos atuais do formulário e descontar do estoque
+    document.querySelectorAll('#insumosUtilizados .insumo-item').forEach(div => {
+        var codigo = div.querySelector('.codigo-barras-insumo').value;
+        var qtd = parseInt(div.querySelector('.quantidade-insumo').value) || 0;
+        if (codigo && qtd > 0) {
+            dadosBasicos.insumos.push({ codigoBarras: codigo, quantidade: qtd });
+            var insumoEstoque = dados.insumos.find(i => i.codigoBarras === codigo);
+            if (insumoEstoque) {
+                insumoEstoque.quantidade -= qtd;
+            }
+        }
+    });
+
+    // 4. Reprocessar cirurgia
     var cirurgiaAtualizada = processarCirurgia(dadosBasicos);
     dados.cirurgias[cirurgiaIndex] = cirurgiaAtualizada;
 
@@ -3861,6 +3890,34 @@ function adicionarBotaoCancelarEdicao() {
     cancelarBtn.style.background = '#dc3545';
     cancelarBtn.onclick = cancelarEdicao;
     form.appendChild(cancelarBtn);
+}
+
+
+// === Função para excluir cirurgia ===
+function excluirCirurgia(id) {
+    if (!confirm('Tem certeza que deseja excluir esta cirurgia?')) return;
+
+    var cirurgiaIndex = dados.cirurgias.findIndex(c => c.id === id);
+    if (cirurgiaIndex === -1) return;
+
+    var cirurgiaRemovida = dados.cirurgias[cirurgiaIndex];
+
+    // 1. Devolver insumos ao estoque
+    if (cirurgiaRemovida.insumos && cirurgiaRemovida.insumos.length > 0) {
+        cirurgiaRemovida.insumos.forEach(item => {
+            var insumoEstoque = dados.insumos.find(i => i.codigoBarras === item.codigoBarras);
+            if (insumoEstoque) {
+                insumoEstoque.quantidade += item.quantidade;
+            }
+        });
+    }
+
+    // 2. Remover cirurgia da lista
+    dados.cirurgias.splice(cirurgiaIndex, 1);
+
+    atualizarTodasAsVisualizacoes();
+    salvarAutomatico();
+    mostrarNotificacao('🗑️ Cirurgia excluída com sucesso!', 'success');
 }
 
 </script>
@@ -3989,6 +4046,34 @@ function adicionarBotaoCancelarEdicao() {
     form.appendChild(cancelarBtn);
 }
 
+
+// === Função para excluir cirurgia ===
+function excluirCirurgia(id) {
+    if (!confirm('Tem certeza que deseja excluir esta cirurgia?')) return;
+
+    var cirurgiaIndex = dados.cirurgias.findIndex(c => c.id === id);
+    if (cirurgiaIndex === -1) return;
+
+    var cirurgiaRemovida = dados.cirurgias[cirurgiaIndex];
+
+    // 1. Devolver insumos ao estoque
+    if (cirurgiaRemovida.insumos && cirurgiaRemovida.insumos.length > 0) {
+        cirurgiaRemovida.insumos.forEach(item => {
+            var insumoEstoque = dados.insumos.find(i => i.codigoBarras === item.codigoBarras);
+            if (insumoEstoque) {
+                insumoEstoque.quantidade += item.quantidade;
+            }
+        });
+    }
+
+    // 2. Remover cirurgia da lista
+    dados.cirurgias.splice(cirurgiaIndex, 1);
+
+    atualizarTodasAsVisualizacoes();
+    salvarAutomatico();
+    mostrarNotificacao('🗑️ Cirurgia excluída com sucesso!', 'success');
+}
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
     // === Busca por Código de Barras (escaneamento) ===
@@ -4112,6 +4197,34 @@ function adicionarBotaoCancelarEdicao() {
     cancelarBtn.style.background = '#dc3545';
     cancelarBtn.onclick = cancelarEdicao;
     form.appendChild(cancelarBtn);
+}
+
+
+// === Função para excluir cirurgia ===
+function excluirCirurgia(id) {
+    if (!confirm('Tem certeza que deseja excluir esta cirurgia?')) return;
+
+    var cirurgiaIndex = dados.cirurgias.findIndex(c => c.id === id);
+    if (cirurgiaIndex === -1) return;
+
+    var cirurgiaRemovida = dados.cirurgias[cirurgiaIndex];
+
+    // 1. Devolver insumos ao estoque
+    if (cirurgiaRemovida.insumos && cirurgiaRemovida.insumos.length > 0) {
+        cirurgiaRemovida.insumos.forEach(item => {
+            var insumoEstoque = dados.insumos.find(i => i.codigoBarras === item.codigoBarras);
+            if (insumoEstoque) {
+                insumoEstoque.quantidade += item.quantidade;
+            }
+        });
+    }
+
+    // 2. Remover cirurgia da lista
+    dados.cirurgias.splice(cirurgiaIndex, 1);
+
+    atualizarTodasAsVisualizacoes();
+    salvarAutomatico();
+    mostrarNotificacao('🗑️ Cirurgia excluída com sucesso!', 'success');
 }
 
 </script>
@@ -4347,6 +4460,34 @@ function adicionarBotaoCancelarEdicao() {
     cancelarBtn.style.background = '#dc3545';
     cancelarBtn.onclick = cancelarEdicao;
     form.appendChild(cancelarBtn);
+}
+
+
+// === Função para excluir cirurgia ===
+function excluirCirurgia(id) {
+    if (!confirm('Tem certeza que deseja excluir esta cirurgia?')) return;
+
+    var cirurgiaIndex = dados.cirurgias.findIndex(c => c.id === id);
+    if (cirurgiaIndex === -1) return;
+
+    var cirurgiaRemovida = dados.cirurgias[cirurgiaIndex];
+
+    // 1. Devolver insumos ao estoque
+    if (cirurgiaRemovida.insumos && cirurgiaRemovida.insumos.length > 0) {
+        cirurgiaRemovida.insumos.forEach(item => {
+            var insumoEstoque = dados.insumos.find(i => i.codigoBarras === item.codigoBarras);
+            if (insumoEstoque) {
+                insumoEstoque.quantidade += item.quantidade;
+            }
+        });
+    }
+
+    // 2. Remover cirurgia da lista
+    dados.cirurgias.splice(cirurgiaIndex, 1);
+
+    atualizarTodasAsVisualizacoes();
+    salvarAutomatico();
+    mostrarNotificacao('🗑️ Cirurgia excluída com sucesso!', 'success');
 }
 
 </script>
