@@ -785,27 +785,78 @@
                 <div class="tab" onclick="abrirAba('relatorios')">Relatorios</div>
             </div>
 
-            <div id="dashboard" class="tab-content active">
+            
+<div id="dashboard" class="tab-content active">
+
+<div class="card" style="margin-bottom: 20px;">
+  <h3>Período do Dashboard</h3>
+  <div style="display:flex; gap:12px; flex-wrap: wrap; align-items: end; margin-top:10px;">
+    <div class="form-group" style="min-width: 220px;">
+      <label>Selecione o período</label>
+      <select id="filtroPeriodo">
+        <option value="mes-atual">Mês Atual</option>
+        <option value="mes-anterior">Mês Anterior</option>
+        <option value="3m">Últimos 3 meses</option>
+        <option value="6m" selected>Últimos 6 meses</option>
+        <option value="12m">Últimos 12 meses</option>
+        <option value="ano-atual">Ano Atual</option>
+        <option value="personalizado">Personalizado</option>
+      </select>
+    </div>
+    <div class="form-group" id="rangePersonalizado" style="display:none;">
+      <label>Data inicial</label>
+      <input type="date" id="periodoDataInicial">
+    </div>
+    <div class="form-group" id="rangePersonalizado2" style="display:none;">
+      <label>Data final</label>
+      <input type="date" id="periodoDataFinal">
+    </div>
+    <button class="btn" type="button" id="aplicarPeriodoBtn">Aplicar</button>
+  </div>
+</div>
+
                 <div class="summary-cards">
                     <div class="summary-card">
                         <h4>Saldo Atual</h4>
                         <div class="value" id="saldoAtual">R$ 0,00</div>
                     </div>
                     <div class="summary-card">
-                        <h4>Receita do Mes</h4>
+                        <h4>Receita (período)</h4>
                         <div class="value" id="totalReceitas">R$ 0,00</div>
                     </div>
                     <div class="summary-card">
-                        <h4>Despesas do Mes</h4>
+                        <h4>Despesas (período)</h4>
                         <div class="value" id="totalDespesas">R$ 0,00</div>
                     </div>
                     <div class="summary-card">
-                        <h4>Resultado do Mes</h4>
+                        <h4>Resultado (período)</h4>
                         <div class="value" id="resultado">R$ 0,00</div>
                     </div>
                     <div class="summary-card">
-                        <h4>Cirurgias do Mes</h4>
+                        <h4>Cirurgias (período)</h4>
                         <div class="value" id="totalCirurgias">0</div>
+                    </div>
+                </div>
+                
+<div class="summary-cards" id="extraSummaryCards">
+                    <div class="summary-card">
+                        <h4>Insumos (compras no período)</h4>
+                        <div class="value" id="gastoInsumosMes">R$ 0,00</div>
+                    </div>
+                <div class="summary-cards" id="gastosResumoCards">
+                    <div class="summary-card">
+                        <h4>Total de Gastos com Insumos (geral)</h4>
+                        <div class="value" id="totalGastosInsumos">R$ 0,00</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Total de Gastos com Despesas (geral)</h4>
+                        <div class="value" id="totalGastosDespesas">R$ 0,00</div>
+                    </div>
+                </div>
+
+                    <div class="summary-card">
+                        <h4>Custo de Cirurgias (período)</h4>
+                        <div class="value" id="custoCirurgiasMes">R$ 0,00</div>
                     </div>
                 </div>
 
@@ -817,6 +868,25 @@
                                 <div>Sistema iniciado com sucesso!</div>
                                 <div class="transaction-date">Adicione receitas e despesas para comecar</div>
                             </div>
+                <div class="grid" id="miniRelatorios">
+                    <div class="card">
+                        <h3>Resumo por Categoria (Mês)</h3>
+                        <table class="table" id="tabelaCategoriasMes">
+                            <thead>
+                                <tr><th>Categoria</th><th>Total do Mês</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>—</td><td>R$ 0,00</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <h3>Evolução Mensal (6 meses)</h3>
+                        <div id="graficoEvolucao" style="width: 100%; height: 260px;"></div>
+                        <div style="font-size: 12px; color: #666; margin-top: 6px;">Receitas vs. Despesas (últimos 6 meses)</div>
+                    </div>
+                </div>
+
                         </div>
                     </div>
                 </div>
@@ -1848,6 +1918,482 @@
             }
         }
 
+        
+        // === FUNÇÕES AUXILIARES PARA ESTATÍSTICAS ===
+        function num(n){ const x = parseFloat(n); return isNaN(x) ? 0 : x; }
+
+        // Cálculo abrangente de custos de uma cirurgia (defensivo para campos ausentes)
+        function custoTotalCirurgia(c){
+            const valorBruto = num(c.valorBruto);
+            const taxaCartao = c.taxaCartao ? valorBruto * num(c.taxaCartao)/100 : 0;
+            const impostos = valorBruto * 0.18; // padrão do formulário
+            const comissao = valorBruto * num(c.comissaoOrientadora)/100;
+            const instrumentadora = num(c.valorInstrumentadora);
+            const funcionariosDia = num(c.custoFuncionariosDia); // se não existir, vira 0
+            const custoInsumos = num(c.totalInsumos || c.custoInsumos); // tenta ambos
+            const outros = num(c.outrosCustos);
+            return taxaCartao + impostos + comissao + instrumentadora + funcionariosDia + custoInsumos + outros;
+        }
+        
+        // Soma despesas (por categoria, opcional) do mês atual
+        function somaDespesasMes(categoria) {
+            const mesAtual = new Date().toISOString().slice(0,7);
+            return dados.despesas.reduce((acc, d) => {
+                if (!d.data || typeof d.data !== 'string') return acc;
+                if (d.data.startsWith(mesAtual) && (!categoria || d.categoria === categoria)) {
+                    return acc + num(d.valor);
+                }
+                return acc;
+            }, 0);
+        }
+
+        
+        // === MINI RELATÓRIO POR CATEGORIA E GRÁFICO ===
+        function categoriasDespesasMesAtual() {
+            const mesAtual = new Date().toISOString().slice(0,7);
+            const mapa = {};
+            (dados.despesas || []).forEach(d => {
+                if (!d || !d.data || typeof d.data !== 'string') return;
+                if (!d.categoria) return;
+                if (d.data.startsWith(mesAtual)) {
+                    mapa[d.categoria] = (mapa[d.categoria] || 0) + (parseFloat(d.valor) || 0);
+                }
+            });
+            // Ordena por total desc e pega top 5
+            const arr = Object.entries(mapa).map(([categoria, total]) => ({categoria, total}));
+            arr.sort((a,b) => b.total - a.total);
+            return arr.slice(0,5);
+        }
+
+        function atualizarTabelaCategoriasMes() {
+            const corpo = document.querySelector('#tabelaCategoriasMes tbody');
+            if (!corpo) return;
+            const top = categoriasDespesasMesAtual();
+            corpo.innerHTML = '';
+            if (!top.length) {
+                corpo.innerHTML = '<tr><td>Sem despesas neste mês</td><td>R$ 0,00</td></tr>';
+                return;
+            }
+            top.forEach(linha => {
+                const tr = document.createElement('tr');
+                const tdCat = document.createElement('td');
+                const tdTot = document.createElement('td');
+                tdCat.textContent = linha.categoria;
+                tdTot.textContent = formatarMoeda(linha.total);
+                tr.appendChild(tdCat);
+                tr.appendChild(tdTot);
+                corpo.appendChild(tr);
+            });
+        }
+
+        function mesesPassados(n) {
+            // retorna array de strings 'YYYY-MM' dos últimos n meses (inclui mês atual)
+            const res = [];
+            const hoje = new Date();
+            const base = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            for (let i = n - 1; i >= 0; i--) {
+                const dt = new Date(base.getFullYear(), base.getMonth() - i, 1);
+                const y = dt.getFullYear();
+                const m = String(dt.getMonth() + 1).padStart(2,'0');
+                res.push(`${y}-${m}`);
+            }
+            return res;
+        }
+
+        function agruparPorMes(registros) {
+            const map = {};
+            (registros || []).forEach(r => {
+                if (!r || !r.data || typeof r.data !== 'string') return;
+                const ym = r.data.slice(0,7);
+                map[ym] = (map[ym] || 0) + (parseFloat(r.valor) || 0);
+            });
+            return map;
+        }
+
+        function dadosEvolucao6m() {
+            const meses = mesesPassados(6);
+            const recPorMes = agruparPorMes(dados.receitas || []);
+            const desPorMes = agruparPorMes(dados.despesas || []);
+            return meses.map(ym => ({
+                mes: ym,
+                receitas: recPorMes[ym] || 0,
+                despesas: desPorMes[ym] || 0
+            }));
+        }
+
+        function renderBarChartSVG(containerId, series) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            const width = el.clientWidth || 600;
+            const height = el.clientHeight || 260;
+            const padding = {top: 20, right: 20, bottom: 30, left: 50};
+            const innerW = width - padding.left - padding.right;
+            const innerH = height - padding.top - padding.bottom;
+
+            const maxVal = Math.max(1, ...series.flatMap(d => [d.receitas, d.despesas]));
+            const meses = series.map(d => d.mes);
+            const groupCount = series.length;
+            const barGroupWidth = innerW / groupCount;
+            const barWidth = Math.max(8, (barGroupWidth - 20) / 2); // duas barras por grupo
+            const gap = 6;
+
+            function yScale(v){ return innerH - (v / maxVal) * innerH; }
+
+            // Eixos e grades simples
+            let svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gráfico de barras de receitas e despesas">
+                <rect x="0" y="0" width="${width}" height="${height}" fill="white" />
+                <g transform="translate(${padding.left},${padding.top})">`;
+
+            // Linhas de grade horizontais (4)
+            for (let i = 0; i <= 4; i++) {
+                const y = (innerH/4)*i;
+                svg += `<line x1="0" y1="${y}" x2="${innerW}" y2="${y}" stroke="#e9ecef" stroke-width="1"/>`;
+            }
+
+            // Barras
+            series.forEach((d, i) => {
+                const x0 = i * barGroupWidth + 10;
+                const hRec = innerH - yScale(d.receitas);
+                const hDes = innerH - yScale(d.despesas);
+                const xRec = x0;
+                const xDes = x0 + barWidth + gap;
+                const yRec = yScale(d.receitas);
+                const yDes = yScale(d.despesas);
+                // Receitas (sem cor fixa; usa cor padrão do SVG)
+                svg += `<rect x="${xRec}" y="${yRec}" width="${barWidth}" height="${hRec}" />`;
+                // Despesas
+                svg += `<rect x="${xDes}" y="${yDes}" width="${barWidth}" height="${hDes}" opacity="0.7" />`;
+                // Rótulo do mês
+                const label = d.mes.slice(5,7) + '/' + d.mes.slice(2,4);
+                svg += `<text x="${x0 + barWidth}" y="${innerH + 18}" text-anchor="middle" font-size="11" fill="#333">${label}</text>`;
+            });
+
+            // Eixo Y (valores)
+            const ticks = 4;
+            for (let t = 0; t <= ticks; t++) {
+                const val = (maxVal / ticks) * t;
+                const y = yScale(val);
+                svg += `<text x="-8" y="${y+4}" text-anchor="end" font-size="11" fill="#666">${formatarMoeda(val)}</text>`;
+            }
+
+            // Legenda simples
+            svg += `<g transform="translate(${innerW - 140}, -8)">
+                        <rect x="0" y="0" width="10" height="10"></rect>
+                        <text x="16" y="9" font-size="11">Receitas</text>
+                        <rect x="90" y="0" width="10" height="10" opacity="0.7"></rect>
+                        <text x="106" y="9" font-size="11">Despesas</text>
+                    </g>`;
+
+            svg += `</g></svg>`;
+            el.innerHTML = svg;
+        }
+
+        
+        // === GASTOS TOTAIS INSUMOS E DESPESAS ===
+        function calcularGastosTotais() {
+            let totalInsumos = 0;
+            let totalDespesas = 0;
+
+            (dados.despesas || []).forEach(d => {
+                if (!d || !d.valor) return;
+                const val = parseFloat(d.valor) || 0;
+                if (d.categoria && d.categoria.toLowerCase().includes("insumo")) {
+                    totalInsumos += val;
+                } else {
+                    totalDespesas += val;
+                }
+            });
+
+            return { totalInsumos, totalDespesas };
+        }
+
+        
+        // === REFRESH AUTOMÁTICO DO DASHBOARD APÓS SUBMISSÕES ===
+        document.addEventListener('DOMContentLoaded', function(){
+            const forms = ['formDespesa','formReceita','formCirurgia','formParcela','formInsumo'];
+            forms.forEach(id => {
+                const f = document.getElementById(id);
+                if (f) {
+                    f.addEventListener('submit', function(){
+                        // Aguarda o handler original inserir os dados em "dados.*"
+                        setTimeout(function(){
+                            try {
+                                if (typeof atualizarTodasAsVisualizacoes === 'function') {
+                                    atualizarTodasAsVisualizacoes();
+                                } else if (typeof atualizarDashboard === 'function') {
+                                    atualizarDashboard();
+                                }
+                                if (typeof salvarDados === 'function') salvarDados();
+                            } catch(e){ console.warn('Auto-refresh dashboard falhou:', e); }
+                        }, 300);
+                    });
+                }
+            });
+        });
+
+        
+        // === FILTRO DE PERÍODO DO DASHBOARD ===
+        let filtroPeriodoSelecionado = '6m';
+        let periodoPersonalizado = {inicio: null, fim: null};
+
+        document.addEventListener('DOMContentLoaded', function(){
+            const sel = document.getElementById('filtroPeriodo');
+            const btn = document.getElementById('aplicarPeriodoBtn');
+            const divIni = document.getElementById('rangePersonalizado');
+            const divFim = document.getElementById('rangePersonalizado2');
+            const di = document.getElementById('periodoDataInicial');
+            const df = document.getElementById('periodoDataFinal');
+
+            function togglePersonalizado(){
+                const v = sel.value;
+                const show = v === 'personalizado';
+                divIni.style.display = show ? 'block' : 'none';
+                divFim.style.display = show ? 'block' : 'none';
+            }
+            sel.addEventListener('change', togglePersonalizado);
+            togglePersonalizado();
+
+            btn.addEventListener('click', function(){
+                filtroPeriodoSelecionado = sel.value;
+                periodoPersonalizado.inicio = di.value || null;
+                periodoPersonalizado.fim = df.value || null;
+                try {
+                    if (typeof atualizarTodasAsVisualizacoes === 'function') {
+                        atualizarTodasAsVisualizacoes();
+                    } else if (typeof atualizarDashboard === 'function') {
+                        atualizarDashboard();
+                    }
+                } catch(e){ console.warn('Erro ao aplicar período:', e); }
+            });
+        });
+
+        function primeiroDiaMes(dt){ return new Date(dt.getFullYear(), dt.getMonth(), 1); }
+        function ultimoDiaMes(dt){ return new Date(dt.getFullYear(), dt.getMonth()+1, 0); }
+        function toISODate(d){ return d.toISOString().slice(0,10); }
+
+        function getRangeDoFiltro(){
+            const hoje = new Date();
+            let inicio, fim;
+            switch (filtroPeriodoSelecionado) {
+                case 'mes-atual': {
+                    inicio = primeiroDiaMes(hoje);
+                    fim = ultimoDiaMes(hoje);
+                    break;
+                }
+                case 'mes-anterior': {
+                    const ref = new Date(hoje.getFullYear(), hoje.getMonth()-1, 1);
+                    inicio = primeiroDiaMes(ref);
+                    fim = ultimoDiaMes(ref);
+                    break;
+                }
+                case '3m':
+                case '6m':
+                case '12m': {
+                    const meses = parseInt(filtroPeriodoSelecionado.replace('m',''), 10);
+                    const ref = new Date(hoje.getFullYear(), hoje.getMonth() - (meses-1), 1);
+                    inicio = primeiroDiaMes(ref);
+                    fim = ultimoDiaMes(hoje);
+                    break;
+                }
+                case 'ano-atual': {
+                    inicio = new Date(hoje.getFullYear(), 0, 1);
+                    fim = new Date(hoje.getFullYear(), 11, 31);
+                    break;
+                }
+                case 'personalizado': {
+                    if (periodoPersonalizado.inicio && periodoPersonalizado.fim) {
+                        inicio = new Date(periodoPersonalizado.inicio + 'T00:00:00');
+                        fim = new Date(periodoPersonalizado.fim + 'T23:59:59');
+                    } else {
+                        // fallback: mês atual
+                        inicio = primeiroDiaMes(hoje);
+                        fim = ultimoDiaMes(hoje);
+                    }
+                    break;
+                }
+                default: {
+                    // fallback: 6 meses
+                    const ref = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1);
+                    inicio = primeiroDiaMes(ref);
+                    fim = ultimoDiaMes(hoje);
+                }
+            }
+            return { inicio: toISODate(inicio), fim: toISODate(fim) };
+        }
+
+        function dataNoIntervalo(iso, inicio, fim){
+            if (!iso || typeof iso !== 'string') return false;
+            return iso >= inicio && iso <= fim;
+        }
+
+        function somaDespesasNoPeriodo(categoria){
+            const {inicio, fim} = getRangeDoFiltro();
+            return (dados.despesas || []).reduce((acc, d) => {
+                if (!d || !d.data) return acc;
+                if (dataNoIntervalo(d.data, inicio, fim) && (!categoria || d.categoria === categoria)) {
+                    acc += parseFloat(d.valor) || 0;
+                }
+                return acc;
+            }, 0);
+        }
+
+        function somaReceitasNoPeriodo(){
+            const {inicio, fim} = getRangeDoFiltro();
+            return (dados.receitas || []).reduce((acc, r) => {
+                if (!r || !r.data) return acc;
+                if (dataNoIntervalo(r.data, inicio, fim)) {
+                    acc += parseFloat(r.valor) || 0;
+                }
+                return acc;
+            }, 0);
+        }
+
+        function contarCirurgiasNoPeriodo(){
+            const {inicio, fim} = getRangeDoFiltro();
+            let n = 0;
+            (dados.cirurgias || []).forEach(c => {
+                if (!c || !c.data) return;
+                if (dataNoIntervalo(c.data, inicio, fim)) n++;
+            });
+            return n;
+        }
+
+        function custoCirurgiasNoPeriodo(){
+            const {inicio, fim} = getRangeDoFiltro();
+            let total = 0;
+            (dados.cirurgias || []).forEach(c => {
+                if (!c || !c.data || c.status === 'cancelada') return;
+                if (dataNoIntervalo(c.data, inicio, fim)) {
+                    total += custoTotalCirurgia(c);
+                }
+            });
+            return total;
+        }
+
+        // Ajustar funções do mini-relatório para considerar período
+        function categoriasDespesasPeriodo() {
+            const {inicio, fim} = getRangeDoFiltro();
+            const mapa = {};
+            (dados.despesas || []).forEach(d => {
+                if (!d || !d.data || !d.categoria) return;
+                if (dataNoIntervalo(d.data, inicio, fim)) {
+                    mapa[d.categoria] = (mapa[d.categoria] || 0) + (parseFloat(d.valor) || 0);
+                }
+            });
+            const arr = Object.entries(mapa).map(([categoria, total]) => ({categoria, total}));
+            arr.sort((a,b) => b.total - a.total);
+            return arr.slice(0,5);
+        }
+
+        function atualizarTabelaCategoriasMes() {
+            const corpo = document.querySelector('#tabelaCategoriasMes tbody');
+            if (!corpo) return;
+            const top = categoriasDespesasPeriodo();
+            corpo.innerHTML = '';
+            if (!top.length) {
+                corpo.innerHTML = '<tr><td>Sem despesas no período</td><td>R$ 0,00</td></tr>';
+                return;
+            }
+            top.forEach(linha => {
+                const tr = document.createElement('tr');
+                const tdCat = document.createElement('td');
+                const tdTot = document.createElement('td');
+                tdCat.textContent = linha.categoria;
+                tdTot.textContent = formatarMoeda(linha.total);
+                tr.appendChild(tdCat);
+                tr.appendChild(tdTot);
+                corpo.appendChild(tr);
+            });
+        }
+
+        // Evolução mensal: usa 3/6/12 meses conforme seleção, senão 6 meses por padrão
+        function mesesPassadosNPorFiltro(){
+            let n = 6;
+            if (['3m','6m','12m'].includes(filtroPeriodoSelecionado)){
+                n = parseInt(filtroPeriodoSelecionado,10);
+            }
+            return n;
+        }
+        function mesesPassados(n) {
+            const res = [];
+            const hoje = new Date();
+            const base = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            for (let i = n - 1; i >= 0; i--) {
+                const dt = new Date(base.getFullYear(), base.getMonth() - i, 1);
+                const y = dt.getFullYear();
+                const m = String(dt.getMonth() + 1).padStart(2,'0');
+                res.push(`${y}-${m}`);
+            }
+            return res;
+        }
+        function agruparPorMes(registros) {
+            const map = {};
+            (registros || []).forEach(r => {
+                if (!r || !r.data || typeof r.data !== 'string') return;
+                const ym = r.data.slice(0,7);
+                map[ym] = (map[ym] || 0) + (parseFloat(r.valor) || 0);
+            });
+            return map;
+        }
+        function dadosEvolucaoPorFiltro() {
+            const meses = mesesPassados(mesesPassadosNPorFiltro());
+            const recPorMes = agruparPorMes(dados.receitas || []);
+            const desPorMes = agruparPorMes(dados.despesas || []);
+            return meses.map(ym => ({
+                mes: ym,
+                receitas: recPorMes[ym] || 0,
+                despesas: desPorMes[ym] || 0
+            }));
+        }
+
+        
+        // === HOOK: enriquecer INSUMOS com dataCadastro e custo total no submit ===
+        document.addEventListener('DOMContentLoaded', function(){
+            const formInsumo = document.getElementById('formInsumo');
+            if (formInsumo) {
+                formInsumo.addEventListener('submit', function(){
+                    setTimeout(function(){
+                        try {
+                            if (!Array.isArray(dados.insumos) || dados.insumos.length === 0) return;
+                            // Pega o último insumo inserido (assumindo que o handler original faz push no final)
+                            const item = dados.insumos[dados.insumos.length - 1];
+                            if (item && !item.dataCadastro) {
+                                item.dataCadastro = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+                            }
+                            // Custo total de compra (se não existir)
+                            const preco = parseFloat(item?.preco) || 0;
+                            const qtd = parseFloat(item?.quantidade) || 0;
+                            const custo = preco * qtd;
+                            if (!isNaN(custo)) item.custoCompraTotal = custo;
+                            // Salva e atualiza painéis
+                            if (typeof salvarDados === 'function') salvarDados();
+                            if (typeof atualizarTodasAsVisualizacoes === 'function') atualizarTodasAsVisualizacoes();
+                            else if (typeof atualizarDashboard === 'function') atualizarDashboard();
+                        } catch(e){ console.warn('Hook formInsumo falhou:', e); }
+                    }, 250);
+                });
+            }
+        });
+
+        
+        // Soma o valor das COMPRAS de insumos (cadastros de INSUMOS) no período selecionado
+        function comprasInsumosNoPeriodo(){
+            const {inicio, fim} = getRangeDoFiltro();
+            let total = 0;
+            (dados.insumos || []).forEach(it => {
+                if (!it) return;
+                // Se não houver dataCadastro, assume dentro do período apenas se não for utilizado (fallback conservador: considerar)
+                const data = it.dataCadastro || it.data || null;
+                const dentro = data ? dataNoIntervalo(data, inicio, fim) : true;
+                if (dentro) {
+                    const preco = parseFloat(it.preco) || 0;
+                    const qtd = parseFloat(it.quantidade) || 0;
+                    total += (it.custoCompraTotal != null ? parseFloat(it.custoCompraTotal)||0 : preco*qtd);
+                }
+            });
+            return total;
+        }
+
         // === FUNÇÕES DO SISTEMA FINANCEIRO ===
         function abrirAba(nomeAba) {
             if (!usuarioLogado) return;
@@ -1905,43 +2451,64 @@
             return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
         }
 
-        function atualizarDashboard() {
-            if (!usuarioLogado) return;
-            
-            var mesAtual = new Date().toISOString().slice(0, 7);
-            
-            var totalReceitas = 0;
-            var totalDespesas = 0;
-            var totalCirurgias = 0;
-            
-            dados.receitas.forEach(function(receita) {
-                if (receita.data.startsWith(mesAtual)) {
-                    totalReceitas += parseFloat(receita.valor);
-                }
-            });
-            
-            dados.despesas.forEach(function(despesa) {
-                if (despesa.data.startsWith(mesAtual)) {
-                    totalDespesas += parseFloat(despesa.valor);
-                }
-            });
-            
-            dados.cirurgias.forEach(function(cirurgia) {
-                if (cirurgia.data.startsWith(mesAtual)) {
-                    totalCirurgias++;
-                }
-            });
-            
-            var resultado = totalReceitas - totalDespesas;
-            
-            document.getElementById('saldoAtual').textContent = formatarMoeda(calcularSaldoAtualGlobal());
-            document.getElementById('totalReceitas').textContent = formatarMoeda(totalReceitas);
-            document.getElementById('totalDespesas').textContent = formatarMoeda(totalDespesas);
-            document.getElementById('resultado').textContent = formatarMoeda(resultado);
-            document.getElementById('totalCirurgias').textContent = totalCirurgias;
-            
-            atualizarUltimasTransacoes();
+        
+function atualizarDashboard() {
+    if (!usuarioLogado) return;
+
+    // === Cálculos com base no período selecionado ===
+    var totalReceitas = (typeof somaReceitasNoPeriodo==='function') ? somaReceitasNoPeriodo() : 0;
+    var totalDespesas = (typeof somaDespesasNoPeriodo==='function') ? somaDespesasNoPeriodo() : 0;
+    var totalCirurgias = (typeof contarCirurgiasNoPeriodo==='function') ? contarCirurgiasNoPeriodo() : 0;
+    var gastoInsumosMes = (typeof somaDespesasNoPeriodo==='function') ? somaDespesasNoPeriodo('insumos') : 0; // via Despesas
+    if (typeof comprasInsumosNoPeriodo === 'function') {
+        gastoInsumosMes += comprasInsumosNoPeriodo(); // + cadastros em Insumos
+    }
+    var custoCirurgiasMes = (typeof custoCirurgiasNoPeriodo==='function') ? custoCirurgiasNoPeriodo() : 0;
+
+    var resultado = totalReceitas - totalDespesas;
+
+    // Cards principais (período)
+    var el;
+    el = document.getElementById('saldoAtual'); if (el) el.textContent = formatarMoeda(calcularSaldoAtualGlobal());
+    el = document.getElementById('totalReceitas'); if (el) el.textContent = formatarMoeda(totalReceitas);
+    el = document.getElementById('totalDespesas'); if (el) el.textContent = formatarMoeda(totalDespesas);
+    el = document.getElementById('resultado'); if (el) el.textContent = formatarMoeda(resultado);
+    el = document.getElementById('totalCirurgias'); if (el) el.textContent = totalCirurgias;
+
+    el = document.getElementById('gastoInsumosMes'); if (el) el.textContent = formatarMoeda(gastoInsumosMes);
+    el = document.getElementById('custoCirurgiasMes'); if (el) el.textContent = formatarMoeda(custoCirurgiasMes);
+
+    // Totais gerais
+    try {
+        const gastos = (typeof calcularGastosTotais==='function') ? calcularGastosTotais() : {totalInsumos:0,totalDespesas:0};
+        var elTotalInsumos = document.getElementById('totalGastosInsumos');
+        var elTotalDespesas = document.getElementById('totalGastosDespesas');
+        if (elTotalDespesas) elTotalDespesas.textContent = formatarMoeda(gastos.totalDespesas);
+        // Somar compras gerais de insumos cadastrados
+        let comprasGerais = 0;
+        (dados.insumos || []).forEach(it => {
+            const preco = parseFloat(it?.preco) || 0;
+            const qtd = parseFloat(it?.quantidade) || 0;
+            comprasGerais += (it?.custoCompraTotal != null ? parseFloat(it.custoCompraTotal)||0 : preco*qtd);
+        });
+        if (elTotalInsumos) elTotalInsumos.textContent = formatarMoeda(gastos.totalInsumos + comprasGerais);
+    } catch (e) {
+        console.warn('Falha ao atualizar totais gerais:', e);
+    }
+
+    // Mini-relatório por categoria (período) e gráfico
+    try {
+        if (typeof atualizarTabelaCategoriasMes === 'function') atualizarTabelaCategoriasMes();
+    } catch(e){ console.warn('Falha ao atualizar tabela de categorias:', e); }
+
+    try {
+        if (typeof dadosEvolucaoPorFiltro === 'function' && typeof renderBarChartSVG === 'function') {
+            const serie = dadosEvolucaoPorFiltro();
+            renderBarChartSVG('graficoEvolucao', serie);
         }
+    } catch(e) { console.warn('Falha ao renderizar gráfico:', e); }
+}
+
 
         function atualizarUltimasTransacoes() {
             var container = document.getElementById('ultimasTransacoes');
