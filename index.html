@@ -892,6 +892,21 @@
                 </div>
             </div>
 
+
+                <div class="card">
+                    <h3>Produção por Médico (período)</h3>
+                    <table class="table" id="tabelaMedicosMes">
+                        <thead>
+                            <tr><th>Médico</th><th>Cirurgias</th><th>Gasto de Insumos</th><th>Comissão do Médico</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>—</td><td>0</td><td>R$ 0,00</td></tr>
+                        </tbody>
+                    </table>
+                    <div style="font-size: 12px; color: #666; margin-top: 6px;">Respeita o período selecionado no filtro do Dashboard.</div>
+                </div>
+
+
             <div id="receitas" class="tab-content">
                 <div class="card">
                     <h3>Registrar Receita</h3>
@@ -1029,6 +1044,19 @@
                                 <input type="text" name="paciente" placeholder="Nome do paciente" required>
                             </div>
                             <div class="form-group">
+                                <label>Médico</label>
+                                <select name="medico" required>
+                                    <option value="">Selecione...</option>
+                                    <option>Dr Leonardo Schiochet</option>
+                                    <option>Dr Gustavo Coninck</option>
+                                    <option>Dr Gustavo Almeida</option>
+                                    <option>Dr Jean</option>
+                                    <option>Dra Simone</option>
+                                    <option>Outros</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
                                 <label>Valor Bruto (R$)</label>
                                 <input type="number" step="0.01" name="valorBruto" placeholder="0,00" required id="valorBrutoCirurgia">
                             </div>
@@ -1066,6 +1094,15 @@
                                         <label>Comissão Orientadora (%)</label>
                                         <input type="number" step="0.01" name="comissaoOrientadora" placeholder="3.0" value="3.0" id="comissaoOrientadora">
                                     </div>
+                                    <div class="form-group">
+                                        <label>Comissão do Médico (%)</label>
+                                        <div style="display:block;">
+                                          <input type="text" inputmode="decimal" name="comissaoMedico" placeholder="Ex: 10.0" value="0.00" id="comissaoMedico" style="flex:1;">
+                                          <button type="button" class="btn" id="salvarPadraoComissaoMedicoBtn" style="padding:8px 12px; margin-top:6px;">Salvar padrão</button>
+                                        </div>
+                                        <div style="font-size:12px; color:#666; margin-top:4px;">Dica: selecione o Médico acima e clique em "Salvar padrão" para guardar o % padrão deste médico.</div>
+                                    </div>
+
                                     <div class="form-group">
                                         <label>Instrumentadora (R$)</label>
                                         <input type="number" step="0.01" name="valorInstrumentadora" placeholder="00.00" value="00.00" id="valorInstrumentadora">
@@ -1133,6 +1170,11 @@
                                     <span>(-) Comissão Orientadora:</span>
                                     <span id="resumoComissaoOrientadora">R$ 0,00</span>
                                 </div>
+                                <div class="valor-detalhado">
+                                    <span>(-) Comissão do Médico:</span>
+                                    <span id="resumoComissaoMedico">R$ 0,00</span>
+                                </div>
+
                                 <div class="valor-detalhado">
                                     <span>(-) Instrumentadora:</span>
                                     <span id="resumoInstrumentadora">R$ 0,00</span>
