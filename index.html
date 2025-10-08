@@ -1488,91 +1488,122 @@
                 </div>
             </div>
 
-            <div id="insumos" class="tab-content">
-                <div class="grid">
-                    <div class="card">
-                        <h3>Registrar Insumo</h3>
-                        <form id="formInsumo">
-                            <div class="form-group">
-                                <label>Nome do Insumo</label>
-                                <input type="text" name="nome" placeholder="Ex: Seringa 5ml" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Categoria</label>
-                                <select name="categoria" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="descartaveis">Descartáveis</option>
-                                    <option value="medicamentos">Medicamentos</option>
-                                    <option value="equipamentos">Equipamentos</option>
-                                    <option value="limpeza">Limpeza</option>
-                                    <option value="outros">Outros</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Quantidade</label>
-                                <input type="number" name="quantidade" placeholder="Ex: 100" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Unidade</label>
-                                <select name="unidade" required>
-                                    <option value="unidade">Unidade</option>
-                                    <option value="caixa">Caixa</option>
-                                    <option value="frasco">Frasco</option>
-                                    <option value="pacote">Pacote</option>
-                                    <option value="litro">Litro</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Preço Unitário (R$)</label>
-                                <input type="number" step="0.01" name="preco" placeholder="0,00" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Estoque Mínimo</label>
-                                <input type="number" name="estoqueMinimo" placeholder="Ex: 10" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Código de Barras</label>
-                                <input type="text" name="codigoBarras" placeholder="Escaneie o código" required>
-                            </div>
-                            </div>
-                            <button type="submit" class="btn">Adicionar Insumo</button>
-                        </form>
-                    </div>
+            
+<div id="insumos" class="tab-content">
+  <div class="grid" style="grid-template-columns: 1.2fr 2fr;">
+    <div class="card">
+      <h3>Cadastrar / Editar Insumo</h3>
+      <form id="formInsumo">
+        <input type="hidden" name="id" id="insumoId">
+        <div class="form-group">
+          <label>Nome do Insumo</label>
+          <input type="text" name="nome" id="insumoNome" placeholder="Ex: Seringa 5ml" required>
+        </div>
+        <div class="form-group">
+          <label>Categoria</label>
+          <select name="categoria" id="insumoCategoria" required>
+            <option value="">Selecione...</option>
+            <option value="descartaveis">Descartáveis</option>
+            <option value="medicamentos">Medicamentos</option>
+            <option value="equipamentos">Equipamentos</option>
+            <option value="limpeza">Limpeza</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Unidade</label>
+          <select name="unidade" id="insumoUnidade" required>
+            <option value="unidade">Unidade</option>
+            <option value="caixa">Caixa</option>
+            <option value="frasco">Frasco</option>
+            <option value="pacote">Pacote</option>
+            <option value="litro">Litro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Preço Unitário (R$)</label>
+          <input type="number" step="0.01" name="preco" id="insumoPreco" placeholder="0,00" required>
+        </div>
+        <div class="form-group">
+          <label>Quantidade em Estoque</label>
+          <input type="number" name="quantidade" id="insumoQuantidade" placeholder="Ex: 100" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Estoque Mínimo</label>
+          <input type="number" name="estoqueMinimo" id="insumoMinimo" placeholder="Ex: 10" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Código de Barras</label>
+          <input type="text" name="codigoBarras" id="insumoCodigoBarras" placeholder="Escaneie o código" required>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn" id="btnSalvarInsumo">Salvar Insumo</button>
+          <button type="button" class="btn" id="btnLimparInsumo" style="background:#6c757d;">Limpar</button>
+        </div>
+      </form>
+    </div>
 
-                    <div class="card">
-                        <h3>Resumo do Estoque</h3>
-                        <div class="summary-cards">
-                            <div class="summary-card">
-                                <h4>Itens Cadastrados</h4>
-                                <div class="value" id="totalItens">0</div>
-                            </div>
-                            <div class="summary-card">
-                                <h4>Itens em Falta</h4>
-                                <div class="value" id="itensEmFalta">0</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="card">
+      <h3>Estoque & Filtros</h3>
+      <div class="grid" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
+        <div class="form-group">
+          <label>Buscar</label>
+          <input type="text" id="filtroBuscaInsumo" placeholder="Nome ou código de barras">
+        </div>
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="filtroCategoriaInsumo">
+            <option value="">Todas</option>
+            <option value="descartaveis">Descartáveis</option>
+            <option value="medicamentos">Medicamentos</option>
+            <option value="equipamentos">Equipamentos</option>
+            <option value="limpeza">Limpeza</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="filtroStatusInsumo">
+            <option value="">Todos</option>
+            <option value="baixo-estoque">Apenas baixo estoque</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <div>
+            <button class="btn" type="button" id="btnExportarInsumos">Exportar CSV</button>
+            <button class="btn" type="button" id="btnImportarInsumos" style="background:#17a2b8;">Importar JSON</button>
+            <input type="file" id="inputImportarInsumos" accept=".json" style="display:none;">
+          </div>
+        </div>
+      </div>
 
-                <div class="card">
-                    <h3>Buscar Produto por Código de Barras</h3>
-                    <div class="form-group">
-                        <input type="text" id="buscarCodigoBarras" placeholder="Escaneie ou digite o código">
-                    </div>
-                    <div id="resultadoBusca"></div>
-                </div>
-
-                <div class="card">
-                    <h3>Lista de Insumos</h3>
-                    <div class="transactions-list" id="listaInsumos">
-                        <div class="transaction-item">
-                            <div class="transaction-info">
-                                <div>Nenhum insumo registrado ainda</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div style="margin-top:10px;">
+        <table class="table" id="tabelaInsumosOrganizada">
+          <thead>
+            <tr>
+              <th data-sort="codigoBarras">Código</th>
+              <th data-sort="nome">Nome</th>
+              <th data-sort="categoria">Categoria</th>
+              <th data-sort="unidade">Unid.</th>
+              <th data-sort="preco">Preço</th>
+              <th data-sort="quantidade">Qtd</th>
+              <th data-sort="estoqueMinimo">Mín.</th>
+              <th>Estoque</th>
+              <th style="width:220px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="9">Nenhum insumo cadastrado</td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:12px; color:#666; margin-top:6px;">Clique nos títulos para ordenar. Itens com baixo estoque ficam destacados.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end insumos -->
+</div>
 
             <div id="relatorios" class="tab-content">
                 <div class="grid">
@@ -1845,6 +1876,7 @@
             atualizarResumoParcelas();
             atualizarListaInsumos();
             atualizarResumoInsumos();
+            renderizarTabelaInsumos && renderizarTabelaInsumos();
             atualizarFinanceiro();
         }
 
@@ -2476,6 +2508,7 @@
                 } else if (nomeAba === 'insumos') {
                     atualizarListaInsumos();
                     atualizarResumoInsumos();
+            renderizarTabelaInsumos && renderizarTabelaInsumos();
                 } else if (nomeAba === 'financeiro') {
                     atualizarFinanceiro();
                 }
@@ -2541,6 +2574,7 @@ function atualizarDashboard() {
     // Mini-relatório por categoria (período) e gráfico
     try {
         if (typeof atualizarTabelaCategoriasMes === 'function') atualizarTabelaCategoriasMes();
+        if (typeof atualizarTabelaMedicosMes === 'function') atualizarTabelaMedicosMes();
     } catch(e){ console.warn('Falha ao atualizar tabela de categorias:', e); }
 
     try {
@@ -3339,18 +3373,22 @@ function atualizarPreco() {
             
             var impostos = valorBruto * 0.18;
             var comissaoOrientadora = valorBruto * ((dadosCirurgia.comissaoOrientadora || 3) / 100);
+            var comissaoMedicoPerc = (parseFloat(dadosCirurgia.comissaoMedico) || 0);
+            var comissaoMedicoValor = valorBruto * (comissaoMedicoPerc / 100);
             var valorInstrumentadora = dadosCirurgia.valorInstrumentadora || 0;
             var custoFuncionarios = calcularCustoFuncionariosDia(); // Cálculo automático
             var outrosCustos = dadosCirurgia.outrosCustos || 0;
             
-            var totalCustosOperacionais = comissaoOrientadora + valorInstrumentadora + custoFuncionarios + outrosCustos;
-            var totalCustos = taxaCartaoValor + impostos + comissaoOrientadora + valorInstrumentadora + custoFuncionarios + totalInsumos + outrosCustos;
+            var totalCustosOperacionais = comissaoOrientadora + comissaoMedicoValor + valorInstrumentadora + custoFuncionarios + outrosCustos;
+            var totalCustos = taxaCartaoValor + impostos + comissaoOrientadora + comissaoMedicoValor + valorInstrumentadora + custoFuncionarios + totalInsumos + outrosCustos;
             var valorLiquido = valorBruto - totalCustos;
             var margem = valorBruto > 0 ? ((valorLiquido / valorBruto) * 100) : 0;
             
             // Estrutura completa da cirurgia
             return {
                 ...dadosCirurgia,
+                comissaoMedicoPerc: comissaoMedicoPerc,
+                comissaoMedicoValor: comissaoMedicoValor,
                 insumosUtilizados: insumosUtilizados,
                 custoInsumos: totalInsumos,
                 comissaoOrientadora: comissaoOrientadora,
@@ -3578,6 +3616,7 @@ function atualizarPreco() {
                 dados.insumos = dados.insumos.filter(i => i.id !== id);
                 atualizarListaInsumos();
                 atualizarResumoInsumos();
+            renderizarTabelaInsumos && renderizarTabelaInsumos();
                 
                 // Salvamento automático
                 salvarAutomatico();
@@ -3827,10 +3866,12 @@ function atualizarPreco() {
                 id: Date.now(),
                 tipo: formData.get('tipo'),
                 paciente: formData.get('paciente'),
+                medico: formData.get('medico'),
                 valorBruto: parseFloat(formData.get('valorBruto')),
                 formaPagamento: formData.get('formaPagamento'),
                 taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
                 comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+                comissaoMedico: parseFloat(formData.get('comissaoMedico')) || 0,
                 valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
                 outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
                 data: formData.get('data'),
@@ -4012,6 +4053,7 @@ function atualizarPreco() {
             e.target.reset();
             atualizarListaInsumos();
             atualizarResumoInsumos();
+            renderizarTabelaInsumos && renderizarTabelaInsumos();
             
             // Salvamento automático
             salvarAutomatico();
@@ -4152,10 +4194,12 @@ function atualizarCirurgia(id) {
         id: id, // Mantém o mesmo ID
         tipo: formData.get('tipo'),
         paciente: formData.get('paciente'),
+                medico: formData.get('medico'),
         valorBruto: parseFloat(formData.get('valorBruto')),
         formaPagamento: formData.get('formaPagamento'),
         taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
         comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+                comissaoMedico: parseFloat(formData.get('comissaoMedico')) || 0,
         valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 200,
         outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
         data: formData.get('data'),
@@ -4438,10 +4482,12 @@ function atualizarCirurgia(id) {
         id: id,
         tipo: formData.get('tipo'),
         paciente: formData.get('paciente'),
+                medico: formData.get('medico'),
         valorBruto: parseFloat(formData.get('valorBruto')),
         formaPagamento: formData.get('formaPagamento'),
         taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
         comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+                comissaoMedico: parseFloat(formData.get('comissaoMedico')) || 0,
         valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
         outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
         data: formData.get('data'),
@@ -4529,6 +4575,345 @@ function excluirCirurgia(id) {
     mostrarNotificacao('🗑️ Cirurgia excluída com sucesso!', 'success');
 }
 
+
+    // === Tabela: Produção por Médico (respeita período do Dashboard) ===
+    function atualizarTabelaMedicosMes(){
+        try {
+            const corpo = document.querySelector('#tabelaMedicosMes tbody');
+            if (!corpo) return;
+            corpo.innerHTML = '';
+            const range = (typeof getRangeDoFiltro==='function') ? getRangeDoFiltro() : null;
+            const inicio = range ? range.inicio : '0000-01-01';
+            const fim    = range ? range.fim    : '9999-12-31';
+
+            const mapa = {};
+            (dados.cirurgias || []).forEach(c => {
+                if (!c || !c.data || c.status !== 'realizada') return;
+                if (c.data >= inicio && c.data <= fim) {
+                    const medico = (c.medico && String(c.medico).trim()) ? c.medico : 'Não informado';
+                    if (!mapa[medico]) {
+                        mapa[medico] = { cirurgias:0, insumos:0, comissao:0 };
+                    }
+                    mapa[medico].cirurgias += 1;
+                    // custo de insumos
+                    const custoInsumos = parseFloat(c.custoInsumos || c.totalInsumos || 0) || 0;
+                    mapa[medico].insumos += custoInsumos;
+                    // comissão do médico (se salvo) ou calcula na hora a partir do %
+                    const valorBruto = parseFloat(c.valorBruto || 0) || 0;
+                    const comPerc = (c.comissaoMedicoPerc != null) ? parseFloat(c.comissaoMedicoPerc) : parseFloat(c.comissaoMedico || 0);
+                    const comVal = (c.comissaoMedicoValor != null) ? parseFloat(c.comissaoMedicoValor) : (valorBruto * ((parseFloat(comPerc)||0)/100));
+                    mapa[medico].comissao += (isNaN(comVal) ? 0 : comVal);
+                }
+            });
+
+            const medicos = Object.keys(mapa);
+            if (!medicos.length){
+                corpo.innerHTML = '<tr><td colspan="4">Sem cirurgias no período selecionado</td></tr>';
+                return;
+            }
+            medicos.sort((a,b)=> mapa[b].cirurgias - mapa[a].cirurgias || a.localeCompare(b));
+            medicos.forEach(nome => {
+                const tr = document.createElement('tr');
+                const tdM = document.createElement('td'); tdM.textContent = nome;
+                const tdC = document.createElement('td'); tdC.textContent = mapa[nome].cirurgias;
+                const tdI = document.createElement('td'); tdI.textContent = formatarMoeda(mapa[nome].insumos);
+                const tdK = document.createElement('td'); tdK.textContent = formatarMoeda(mapa[nome].comissao);
+                tr.appendChild(tdM); tr.appendChild(tdC); tr.appendChild(tdI); tr.appendChild(tdK);
+                corpo.appendChild(tr);
+            });
+        } catch(e){
+            console.warn('Falha ao atualizar tabela de médicos:', e);
+        }
+    }
+    
+
+// === INSUMOS: UI organizada, filtros, ordenação e operações ===
+let estadoInsumos = {
+  sortKey: 'nome',
+  sortDir: 'asc',
+  busca: '',
+  categoria: '',
+  status: ''
+};
+
+function comparar(a, b, key){
+  const va = (a[key] ?? '').toString().toLowerCase();
+  const vb = (b[key] ?? '').toString().toLowerCase();
+  if (!isNaN(parseFloat(a[key])) && !isNaN(parseFloat(b[key]))){
+    return (parseFloat(a[key]) - parseFloat(b[key]));
+  }
+  return va.localeCompare(vb, 'pt-BR');
+}
+
+function aplicarFiltrosInsumos(lista){
+  let arr = [...lista];
+  const {busca, categoria, status} = estadoInsumos;
+  if (busca){
+    const q = busca.toLowerCase();
+    arr = arr.filter(i => (i.nome||'').toLowerCase().includes(q) || (i.codigoBarras||'').toLowerCase().includes(q));
+  }
+  if (categoria){
+    arr = arr.filter(i => i.categoria === categoria);
+  }
+  if (status === 'baixo-estoque'){
+    arr = arr.filter(i => (parseFloat(i.quantidade)||0) <= (parseFloat(i.estoqueMinimo)||0));
+  }
+  return arr;
+}
+
+function renderizarTabelaInsumos(){
+  try{
+    const tbody = document.querySelector('#tabelaInsumosOrganizada tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (!dados.insumos) dados.insumos = [];
+    let lista = aplicarFiltrosInsumos(dados.insumos);
+
+    // Ordenação
+    const {sortKey, sortDir} = estadoInsumos;
+    lista.sort((a,b)=>{
+      const r = comparar(a,b,sortKey);
+      return sortDir === 'asc' ? r : -r;
+    });
+
+    if (lista.length === 0){
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 9;
+      td.textContent = 'Nenhum insumo encontrado';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    lista.forEach(ins => {
+      const tr = document.createElement('tr');
+      const baixo = (parseFloat(ins.quantidade)||0) <= (parseFloat(ins.estoqueMinimo)||0);
+      if (baixo) tr.style.background = '#fff3cd'; // destaque baixo estoque
+
+      tr.innerHTML = `
+        <td>${ins.codigoBarras||''}</td>
+        <td>${ins.nome||''}</td>
+        <td>${ins.categoria||''}</td>
+        <td>${ins.unidade||''}</td>
+        <td>${formatarMoeda(parseFloat(ins.preco)||0)}</td>
+        <td>${ins.quantidade||0}</td>
+        <td>${ins.estoqueMinimo||0}</td>
+        <td>${baixo ? 'Baixo' : 'OK'}</td>
+        <td>
+          <button class="btn" type="button" onclick="editarInsumo(${ins.id})">Editar</button>
+          <button class="btn" type="button" style="background:#dc3545" onclick="excluirInsumo(${ins.id})">Excluir</button>
+          <button class="btn" type="button" style="background:#28a745" onclick="registrarEntradaPrompt(${ins.id})">+Entrada</button>
+          <button class="btn" type="button" style="background:#ffc107;color:#212529" onclick="registrarSaidaPrompt(${ins.id})">-Saída</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch(e){
+    console.warn('Falha ao renderizar tabela de insumos', e);
+  }
+}
+
+function editarInsumo(id){
+  const ins = dados.insumos.find(i=>i.id===id);
+  if (!ins) return;
+  document.getElementById('insumoId').value = ins.id;
+  document.getElementById('insumoNome').value = ins.nome||'';
+  document.getElementById('insumoCategoria').value = ins.categoria||'';
+  document.getElementById('insumoUnidade').value = ins.unidade||'unidade';
+  document.getElementById('insumoPreco').value = ins.preco||0;
+  document.getElementById('insumoQuantidade').value = ins.quantidade||0;
+  document.getElementById('insumoMinimo').value = ins.estoqueMinimo||0;
+  document.getElementById('insumoCodigoBarras').value = ins.codigoBarras||'';
+  mostrarNotificacao('✏️ Editando insumo: ' + (ins.nome||''), 'info');
+}
+
+function limparFormInsumo(){
+  document.getElementById('formInsumo').reset();
+  document.getElementById('insumoId').value = '';
+}
+
+function excluirInsumo(id){
+  if (!confirm('Excluir este insumo?')) return;
+  dados.insumos = (dados.insumos||[]).filter(i=>i.id!==id);
+  salvarDados();
+  atualizarResumoInsumos();
+            renderizarTabelaInsumos && renderizarTabelaInsumos();
+  renderizarTabelaInsumos();
+  mostrarNotificacao('🗑️ Insumo excluído', 'success');
+}
+
+function registrarEntradaPrompt(id){
+  const qtd = parseFloat(prompt('Quantidade de ENTRADA:','0'))||0;
+  if (qtd<=0) return;
+  const preco = prompt('Atualizar preço unitário? (opcional)','');
+  registrarEntrada(id, qtd, preco ? parseFloat(preco) : null);
+}
+
+function registrarSaidaPrompt(id){
+  const qtd = parseFloat(prompt('Quantidade de SAÍDA:','0'))||0;
+  if (qtd<=0) return;
+  registrarSaida(id, qtd);
+}
+
+function registrarEntrada(id, quantidade, novoPreco=null){
+  const ins = dados.insumos.find(i=>i.id===id);
+  if (!ins) return;
+  ins.quantidade = (parseFloat(ins.quantidade)||0) + quantidade;
+  if (novoPreco!==null && !Number.isNaN(novoPreco)) ins.preco = novoPreco;
+  salvarDados();
+  atualizarResumoInsumos();
+            renderizarTabelaInsumos && renderizarTabelaInsumos();
+  renderizarTabelaInsumos();
+  mostrarNotificacao('✅ Entrada registrada', 'success');
+}
+
+function registrarSaida(id, quantidade){
+  const ins = dados.insumos.find(i=>i.id===id);
+  if (!ins) return;
+  ins.quantidade = Math.max(0, (parseFloat(ins.quantidade)||0) - quantidade);
+  salvarDados();
+  atualizarResumoInsumos();
+            renderizarTabelaInsumos && renderizarTabelaInsumos();
+  renderizarTabelaInsumos();
+  mostrarNotificacao('✅ Saída registrada', 'success');
+}
+
+function exportarInsumosCSV(){
+  const cab = ['id','codigoBarras','nome','categoria','unidade','preco','quantidade','estoqueMinimo'];
+  const rows = [cab.join(';')];
+  (dados.insumos||[]).forEach(i=>{
+    rows.push([i.id,i.codigoBarras,i.nome,i.categoria,i.unidade,i.preco,i.quantidade,i.estoqueMinimo].map(v=> (v == null ? '' : String(v))).join(';'));
+  });
+  const blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'insumos.csv';
+  a.click();
+}
+
+function importarInsumosJSON(file){
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const arr = JSON.parse(e.target.result);
+      if (!Array.isArray(arr)) throw new Error('JSON deve ser um array');
+      const agora = Date.now();
+      arr.forEach((i,idx)=>{
+        if (!i.id) i.id = agora + idx;
+        if (typeof i.quantidade==='undefined') i.quantidade = 0;
+        if (typeof i.estoqueMinimo==='undefined') i.estoqueMinimo = 0;
+      });
+      dados.insumos = (dados.insumos||[]).concat(arr);
+      salvarDados();
+      atualizarResumoInsumos();
+            renderizarTabelaInsumos && renderizarTabelaInsumos();
+      renderizarTabelaInsumos();
+      mostrarNotificacao('📥 Importação concluída', 'success');
+    }catch(err){
+      console.error(err);
+      mostrarNotificacao('❌ JSON inválido', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Eventos de UI da aba
+document.addEventListener('click', function(e){
+  if (e.target && e.target.matches('#btnExportarInsumos')) exportarInsumosCSV();
+  if (e.target && e.target.matches('#btnImportarInsumos')) document.getElementById('inputImportarInsumos').click();
+});
+
+document.addEventListener('change', function(e){
+  if (e.target && e.target.matches('#inputImportarInsumos')){
+    if (e.target.files && e.target.files[0]) importarInsumosJSON(e.target.files[0]);
+  }
+});
+
+document.addEventListener('input', function(e){
+  if (e.target && e.target.matches('#filtroBuscaInsumo')){
+    estadoInsumos.busca = e.target.value.trim();
+    renderizarTabelaInsumos();
+  }
+});
+
+document.addEventListener('change', function(e){
+  if (e.target && e.target.matches('#filtroCategoriaInsumo')){
+    estadoInsumos.categoria = e.target.value;
+    renderizarTabelaInsumos();
+  }
+  if (e.target && e.target.matches('#filtroStatusInsumo')){
+    estadoInsumos.status = e.target.value;
+    renderizarTabelaInsumos();
+  }
+});
+
+// Sort por cabeçalho
+document.addEventListener('click', function(e){
+  const th = e.target.closest('#tabelaInsumosOrganizada thead th[data-sort]');
+  if (!th) return;
+  const key = th.getAttribute('data-sort');
+  if (estadoInsumos.sortKey === key){
+    estadoInsumos.sortDir = (estadoInsumos.sortDir === 'asc') ? 'desc' : 'asc';
+  } else {
+    estadoInsumos.sortKey = key;
+    estadoInsumos.sortDir = 'asc';
+  }
+  renderizarTabelaInsumos();
+});
+
+// Submit do formulário de insumos
+document.addEventListener('submit', function(e){
+  if (e.target && e.target.matches('#formInsumo')){
+    e.preventDefault();
+    const id = parseInt(document.getElementById('insumoId').value) || null;
+    const novo = {
+      id: id || Date.now(),
+      nome: document.getElementById('insumoNome').value.trim(),
+      categoria: document.getElementById('insumoCategoria').value,
+      unidade: document.getElementById('insumoUnidade').value,
+      preco: parseFloat(document.getElementById('insumoPreco').value) || 0,
+      quantidade: parseFloat(document.getElementById('insumoQuantidade').value) || 0,
+      estoqueMinimo: parseFloat(document.getElementById('insumoMinimo').value) || 0,
+      codigoBarras: document.getElementById('insumoCodigoBarras').value.trim()
+    };
+    if (!dados.insumos) dados.insumos = [];
+    const idx = dados.insumos.findIndex(i=>i.id===novo.id);
+    if (idx>=0) dados.insumos[idx] = novo;
+    else dados.insumos.push(novo);
+    salvarDados();
+    atualizarResumoInsumos();
+            renderizarTabelaInsumos && renderizarTabelaInsumos();
+    renderizarTabelaInsumos();
+    limparFormInsumo();
+    mostrarNotificacao('💾 Insumo salvo', 'success');
+  }
+});
+
+// Botão limpar
+document.addEventListener('click', function(e){
+  if (e.target && e.target.matches('#btnLimparInsumo')){
+    limparFormInsumo();
+  }
+});
+
+// Hookar render na abertura da aba
+const _abrirAba_ref = window.abrirAba;
+window.abrirAba = function(aba){
+  if (typeof _abrirAba_ref === 'function') _abrirAba_ref(aba);
+  if (aba === 'insumos'){
+    renderizarTabelaInsumos();
+  }
+};
+
+// Garantir chamadas dentro das rotinas globais
+const _atualizarResumoInsumos_ref = window.atualizarResumoInsumos;
+window.atualizarResumoInsumos = function(){
+  if (typeof _atualizarResumoInsumos_ref === 'function') _atualizarResumoInsumos_ref();
+  // Também atualiza contadores e render
+  renderizarTabelaInsumos();
+};
+
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
@@ -4607,10 +4992,12 @@ function atualizarCirurgia(id) {
         id: id,
         tipo: formData.get('tipo'),
         paciente: formData.get('paciente'),
+                medico: formData.get('medico'),
         valorBruto: parseFloat(formData.get('valorBruto')),
         formaPagamento: formData.get('formaPagamento'),
         taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
         comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+                comissaoMedico: parseFloat(formData.get('comissaoMedico')) || 0,
         valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
         outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
         data: formData.get('data'),
@@ -4760,10 +5147,12 @@ function atualizarCirurgia(id) {
         id: id,
         tipo: formData.get('tipo'),
         paciente: formData.get('paciente'),
+                medico: formData.get('medico'),
         valorBruto: parseFloat(formData.get('valorBruto')),
         formaPagamento: formData.get('formaPagamento'),
         taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
         comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+                comissaoMedico: parseFloat(formData.get('comissaoMedico')) || 0,
         valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
         outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
         data: formData.get('data'),
@@ -5023,10 +5412,12 @@ function atualizarCirurgia(id) {
         id: id,
         tipo: formData.get('tipo'),
         paciente: formData.get('paciente'),
+                medico: formData.get('medico'),
         valorBruto: parseFloat(formData.get('valorBruto')),
         formaPagamento: formData.get('formaPagamento'),
         taxaCartao: parseFloat(formData.get('taxaCartao')) || 0,
         comissaoOrientadora: parseFloat(formData.get('comissaoOrientadora')) || 3,
+                comissaoMedico: parseFloat(formData.get('comissaoMedico')) || 0,
         valorInstrumentadora: parseFloat(formData.get('valorInstrumentadora')) || 0,
         outrosCustos: parseFloat(formData.get('outrosCustos')) || 0,
         data: formData.get('data'),
