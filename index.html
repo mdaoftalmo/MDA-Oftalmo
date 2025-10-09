@@ -4914,6 +4914,17 @@ window.atualizarResumoInsumos = function(){
   renderizarTabelaInsumos();
 };
 
+
+// === Shims de compatibilidade (evita erros "Cannot set properties of null") ===
+if (typeof window.atualizarListaInsumos !== 'function') {
+  window.atualizarListaInsumos = function(){
+    try { if (typeof renderizarTabelaInsumos === 'function') renderizarTabelaInsumos(); } catch(e){ console.warn(e); }
+  };
+}
+if (typeof window.atualizarTabelaCategoriasMes !== 'function') {
+  window.atualizarTabelaCategoriasMes = function(){};
+}
+
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
