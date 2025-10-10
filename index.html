@@ -3510,8 +3510,8 @@ function atualizarPreco() {
 
         function atualizarResumoGastosFixos() {
             var total = dados.gastosFixos.reduce((total, g) => total + parseFloat(g.valor), 0);
-            document.getElementById('totalGastosFixosDetalhado').innerHTML = '<strong>' + formatarMoeda(total) + '</strong>';
-            document.getElementById('totalGastosFixos').textContent = formatarMoeda(total);
+            var _gd=document.getElementById('totalGastosFixosDetalhado'); if(_gd){ _gd.innerHTML = '<strong>'+formatarMoeda(total)+'</strong>'; }
+            var _gf=document.getElementById('totalGastosFixos'); if(_gf){ _gf.textContent = formatarMoeda(total); }
         }
 
         function excluirGastoFixo(id) {
@@ -3530,7 +3530,8 @@ function atualizarPreco() {
         // === FUNÇÕES PARA PARCELAS ===
         function atualizarListaParcelas() {
             var container = document.getElementById('listaParcelas');
-            if (dados.parcelas.length === 0) {
+            
+            if (!container) return;  // guard addedif (dados.parcelas.length === 0) {
                 container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Nenhuma parcela registrada ainda</div></div></div>';
             } else {
                 var html = '';
@@ -3562,9 +3563,9 @@ function atualizarPreco() {
             var totalAReceber = dados.parcelas.filter(p => p.tipo === 'receber' && p.status === 'pendente').reduce((total, p) => total + parseFloat(p.valor), 0);
             var totalParcelasRegistradas = dados.parcelas.length; // Novo: Contagem total de parcelas
             
-            document.getElementById('totalAPagar').textContent = formatarMoeda(totalAPagar);
-            document.getElementById('totalAReceber').textContent = formatarMoeda(totalAReceber);
-            document.getElementById('totalParcelasRegistradas').textContent = totalParcelasRegistradas; // Atualiza o novo elemento
+            var _ap=document.getElementById('totalAPagar'); if(_ap){ _ap.textContent = formatarMoeda(totalAPagar); }
+            var _ar=document.getElementById('totalAReceber'); if(_ar){ _ar.textContent = formatarMoeda(totalAReceber); }
+            var _tpr=document.getElementById('totalParcelasRegistradas'); if(_tpr){ _tpr.textContent = totalParcelasRegistradas; } // Atualiza o novo elemento
         }
 
         function excluirParcela(id) {
@@ -3583,7 +3584,8 @@ function atualizarPreco() {
         // === FUNÇÕES PARA INSUMOS ===
         function atualizarListaInsumos() {
             var container = document.getElementById('listaInsumos');
-            if (dados.insumos.length === 0) {
+            
+            if (!container) return;  // guard addedif (dados.insumos.length === 0) {
                 container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Nenhum insumo registrado ainda</div></div></div>';
             } else {
                 var html = '';
@@ -3606,8 +3608,8 @@ function atualizarPreco() {
             var totalItens = dados.insumos.length;
             var itensEmFalta = dados.insumos.filter(i => i.quantidade <= i.estoqueMinimo).length;
             
-            document.getElementById('totalItens').textContent = totalItens;
-            document.getElementById('itensEmFalta').textContent = itensEmFalta;
+            var _ti=document.getElementById('totalItens'); if(_ti){ _ti.textContent = totalItens; }
+            var _ie=document.getElementById('itensEmFalta'); if(_ie){ _ie.textContent = itensEmFalta; }
         }
 
         function excluirInsumo(id) {
@@ -3660,7 +3662,7 @@ function atualizarPreco() {
             }
             
             var relatorio = gerarRelatorioDetalhado(dataInicial, dataFinal);
-            document.getElementById('relatorioConteudo').innerHTML = relatorio;
+            var _rc=document.getElementById('relatorioConteudo'); if(_rc){ _rc.innerHTML = relatorio; }
         }
 
         function gerarRelatorioDetalhado(dataInicial, dataFinal) {
@@ -5245,7 +5247,7 @@ function excluirCirurgia(id) {
     authDomain: "clinica-981e8.firebaseapp.com",
     databaseURL: "https://clinica-981e8-default-rtdb.firebaseio.com",
     projectId: "clinica-981e8",
-    storageBucket: "clinica-981e8.firebasestorage.app",
+    storageBucket: "clinica-981e8.appspot.com",
     messagingSenderId: "766482530366",
     appId: "1:766482530366:web:31321baff2da7a8623916f"
   };
@@ -5517,7 +5519,7 @@ function excluirCirurgia(id) {
     authDomain: "clinica-981e8.firebaseapp.com",
     databaseURL: "https://clinica-981e8-default-rtdb.firebaseio.com",
     projectId: "clinica-981e8",
-    storageBucket: "clinica-981e8.firebasestorage.app",
+    storageBucket: "clinica-981e8.appspot.com",
     messagingSenderId: "766482530366",
     appId: "1:766482530366:web:31321baff2da7a8623916f"
   };
