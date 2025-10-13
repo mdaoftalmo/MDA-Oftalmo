@@ -3510,8 +3510,8 @@ function atualizarPreco() {
 
         function atualizarResumoGastosFixos() {
             var total = dados.gastosFixos.reduce((total, g) => total + parseFloat(g.valor), 0);
-            var _gd=document.getElementById('totalGastosFixosDetalhado'); if(_gd){ _gd.innerHTML = '<strong>'+formatarMoeda(total)+'</strong>'; }
-            var _gf=document.getElementById('totalGastosFixos'); if(_gf){ _gf.textContent = formatarMoeda(total); }
+            document.getElementById('totalGastosFixosDetalhado').innerHTML = '<strong>' + formatarMoeda(total) + '</strong>';
+            document.getElementById('totalGastosFixos').textContent = formatarMoeda(total);
         }
 
         function excluirGastoFixo(id) {
@@ -3530,8 +3530,7 @@ function atualizarPreco() {
         // === FUNÇÕES PARA PARCELAS ===
         function atualizarListaParcelas() {
             var container = document.getElementById('listaParcelas');
-            
-            if (!container) return;  // guard addedif (dados.parcelas.length === 0) {
+            if (dados.parcelas.length === 0) {
                 container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Nenhuma parcela registrada ainda</div></div></div>';
             } else {
                 var html = '';
@@ -3563,9 +3562,9 @@ function atualizarPreco() {
             var totalAReceber = dados.parcelas.filter(p => p.tipo === 'receber' && p.status === 'pendente').reduce((total, p) => total + parseFloat(p.valor), 0);
             var totalParcelasRegistradas = dados.parcelas.length; // Novo: Contagem total de parcelas
             
-            var _ap=document.getElementById('totalAPagar'); if(_ap){ _ap.textContent = formatarMoeda(totalAPagar); }
-            var _ar=document.getElementById('totalAReceber'); if(_ar){ _ar.textContent = formatarMoeda(totalAReceber); }
-            var _tpr=document.getElementById('totalParcelasRegistradas'); if(_tpr){ _tpr.textContent = totalParcelasRegistradas; } // Atualiza o novo elemento
+            document.getElementById('totalAPagar').textContent = formatarMoeda(totalAPagar);
+            document.getElementById('totalAReceber').textContent = formatarMoeda(totalAReceber);
+            document.getElementById('totalParcelasRegistradas').textContent = totalParcelasRegistradas; // Atualiza o novo elemento
         }
 
         function excluirParcela(id) {
@@ -3584,8 +3583,7 @@ function atualizarPreco() {
         // === FUNÇÕES PARA INSUMOS ===
         function atualizarListaInsumos() {
             var container = document.getElementById('listaInsumos');
-            
-            if (!container) return;  // guard addedif (dados.insumos.length === 0) {
+            if (dados.insumos.length === 0) {
                 container.innerHTML = '<div class="transaction-item"><div class="transaction-info"><div>Nenhum insumo registrado ainda</div></div></div>';
             } else {
                 var html = '';
@@ -3608,8 +3606,8 @@ function atualizarPreco() {
             var totalItens = dados.insumos.length;
             var itensEmFalta = dados.insumos.filter(i => i.quantidade <= i.estoqueMinimo).length;
             
-            var _ti=document.getElementById('totalItens'); if(_ti){ _ti.textContent = totalItens; }
-            var _ie=document.getElementById('itensEmFalta'); if(_ie){ _ie.textContent = itensEmFalta; }
+            document.getElementById('totalItens').textContent = totalItens;
+            document.getElementById('itensEmFalta').textContent = itensEmFalta;
         }
 
         function excluirInsumo(id) {
@@ -3662,7 +3660,7 @@ function atualizarPreco() {
             }
             
             var relatorio = gerarRelatorioDetalhado(dataInicial, dataFinal);
-            var _rc=document.getElementById('relatorioConteudo'); if(_rc){ _rc.innerHTML = relatorio; }
+            document.getElementById('relatorioConteudo').innerHTML = relatorio;
         }
 
         function gerarRelatorioDetalhado(dataInicial, dataFinal) {
@@ -5247,7 +5245,7 @@ function excluirCirurgia(id) {
     authDomain: "clinica-981e8.firebaseapp.com",
     databaseURL: "https://clinica-981e8-default-rtdb.firebaseio.com",
     projectId: "clinica-981e8",
-    storageBucket: "clinica-981e8.appspot.com",
+    storageBucket: "clinica-981e8.firebasestorage.app",
     messagingSenderId: "766482530366",
     appId: "1:766482530366:web:31321baff2da7a8623916f"
   };
@@ -5506,134 +5504,3 @@ function excluirCirurgia(id) {
 </script>
 
 </html>
-
-<!-- ====== Integração Firebase (carregar/salvar na nuvem) ====== -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-  // Config do usuário
-  const firebaseConfig = {
-    apiKey: "AIzaSyD1ruP7W5uYL185rOUnFqHd9GUlDp4VhXs",
-    authDomain: "clinica-981e8.firebaseapp.com",
-    databaseURL: "https://clinica-981e8-default-rtdb.firebaseio.com",
-    projectId: "clinica-981e8",
-    storageBucket: "clinica-981e8.appspot.com",
-    messagingSenderId: "766482530366",
-    appId: "1:766482530366:web:31321baff2da7a8623916f"
-  };
-
-  const LS_KEY  = 'sistemaFinanceiro_dados';
-  const LS_LAST = 'sistemaFinanceiro_ultimoSalvamento';
-
-  let app, db, auth, UID = null;
-
-  function nowBR() { return new Date().toLocaleString('pt-BR'); }
-  function log(...a){ try{ console.log('[firebase]', ...a);}catch(_){} }
-  function notify(msg, type='info'){
-    // tenta usar o sistema de notificação nativo, se existir
-    if (typeof window.mostrarNotificacao === 'function') {
-      window.mostrarNotificacao(msg, type);
-    } else {
-      alert(msg);
-    }
-  }
-
-  async function initFirebase() {
-    if (UID) return;
-    app = initializeApp(firebaseConfig);
-    db  = getDatabase(app);
-    auth = getAuth(app);
-    await signInAnonymously(auth);
-    await new Promise(resolve => {
-      onAuthStateChanged(auth, user => {
-        if (user) { UID = user.uid; log('Auth OK', UID); }
-        resolve();
-      });
-    });
-  }
-
-  function dbPath(){ return `clinicas/${UID}/dados`; }
-
-  async function carregarDaNuvem() {
-    await initFirebase();
-    const snap = await get(ref(db, dbPath()));
-    if (snap.exists()) {
-      const dados = snap.val();
-      localStorage.setItem(LS_KEY, JSON.stringify(dados));
-      localStorage.setItem(LS_LAST, nowBR());
-      log('Dados carregados da nuvem → localStorage.');
-      if (typeof window.atualizarTodasAsVisualizacoes === 'function') window.atualizarTodasAsVisualizacoes();
-      notify('☁️ Dados carregados da nuvem!', 'success');
-      return true;
-    } else {
-      log('Sem dados na nuvem para este UID.');
-      notify('⚠️ Ainda não há dados na nuvem para este usuário. Envie seus dados locais para a nuvem.', 'warning');
-      return false;
-    }
-  }
-
-  async function salvarNaNuvem() {
-    await initFirebase();
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) { notify('Nada para enviar: dados locais estão vazios.', 'warning'); return; }
-    const dados = JSON.parse(raw);
-    dados.dataUltimoUploadNuvem = new Date().toISOString();
-    await set(ref(db, dbPath()), dados);
-    log('Dados enviados para a nuvem.');
-    notify('☁️ Dados enviados para a nuvem!', 'success');
-  }
-
-  // Envelopa a função original salvarDados(), se existir
-  const _salvarDadosOriginal = typeof window.salvarDados === 'function' ? window.salvarDados : null;
-  window.salvarDados = async function(){
-    if (_salvarDadosOriginal) _salvarDadosOriginal();
-    try { await salvarNaNuvem(); } catch(e){ log(e); notify('Erro ao salvar na nuvem. Veja o console.', 'error'); }
-  };
-
-  // Botão flutuante para envio imediato à nuvem (migração inicial)
-  function criaBotaoUploadFlutuante(){
-    if (document.getElementById('btnUploadNuvemFlutuante')) return;
-    const btn = document.createElement('button');
-    btn.id = 'btnUploadNuvemFlutuante';
-    btn.textContent = '☁️ Enviar para Nuvem (agora)';
-    btn.style.cssText = `
-      position: fixed; right: 16px; bottom: 16px; z-index: 99999;
-      background: #17a2b8; color: #fff; border: none; border-radius: 8px;
-      padding: 10px 14px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,.2);
-      cursor: pointer;
-    `;
-    btn.onclick = async () => { try{ await salvarNaNuvem(); } catch(e){ log(e); } };
-    document.body.appendChild(btn);
-  }
-
-  // Após login, tenta carregar da nuvem (se falhar, mantém local)
-  async function aposLogin(){
-    try{
-      const ok = await carregarDaNuvem();
-      if (!ok) {
-        // mantém dados locais (ex.: carregados via "Carregar Backup")
-      }
-    } catch(e){
-      log(e);
-      notify('Erro ao carregar da nuvem! Carregando localmente...', 'error');
-    } finally {
-      criaBotaoUploadFlutuante();
-    }
-  }
-
-  // Engata no submit do login (id="loginForm" é comum neste projeto)
-  (function hookLogin(){
-    const form = document.getElementById('loginForm');
-    if (!form) { 
-      // se não houver tela de login, tenta imediatamente (útil em htmls já autenticados)
-      setTimeout(aposLogin, 800);
-      return;
-    }
-    form.addEventListener('submit', function _once(){
-      setTimeout(aposLogin, 800);
-      form.removeEventListener('submit', _once);
-    });
-  })();
-</script>
